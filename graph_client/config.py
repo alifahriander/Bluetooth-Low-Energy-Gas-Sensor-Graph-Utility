@@ -38,3 +38,5 @@ DICTIONARY_OF_CHANNEL_KEYS = {
                             }
 
 LINE_THICKNESS = 1.0
+
+DOWNLOADING_FILES = False
