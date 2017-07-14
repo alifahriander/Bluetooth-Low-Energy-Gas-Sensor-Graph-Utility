@@ -51,11 +51,11 @@ class Server_Handler(QThread):
         finally:
             ping_test_socket.close()
 
-    def get_file_from_server(self, passed_file_path_frequency_resistance):
+    def get_file_from_server(self, passed_file_path):
         if not self.ping_test():
             return
 
-        passed_file_path_frequency_resistance = passed_file_path_frequency_resistance.replace('\\','/')
+        passed_file_path = passed_file_path.replace('\\','/')
         position_to_cut = len(LOCAL_DIRECTORY_OF_SENSOR_DATA)
 
 
@@ -65,12 +65,12 @@ class Server_Handler(QThread):
                                cnopts=self.cnopts,
                                port = RASPBERRY_PI_PORT) as sftp:
 
-            remote_path = RASPBERRY_PI_SENSOR_DATA_FOLDER + passed_file_path_frequency_resistance[position_to_cut:]
+            remote_path = RASPBERRY_PI_SENSOR_DATA_FOLDER + passed_file_path[position_to_cut:]
 
             global DOWNLOADING_FILES
             if sftp.exists(remote_path) and not DOWNLOADING_FILES:
                 DOWNLOADING_FILES = True
-                sftp.get(remote_path, LOCAL_DIRECTORY_OF_SENSOR_DATA + passed_file_path_frequency_resistance[position_to_cut:], preserve_mtime=True)
+                sftp.get(remote_path, LOCAL_DIRECTORY_OF_SENSOR_DATA + passed_file_path[position_to_cut:], preserve_mtime=True)
                 DOWNLOADING_FILES = False
 
     def get_sensor_data_from_server(self):
@@ -94,7 +94,7 @@ class Server_Handler(QThread):
         while (self.is_running):
             try:
                 if self.attempt_connection:
-                    self.get_file_from_server(str(self.parent_widget.file_path_frequency_resistance))
+                    self.get_file_from_server(str(self.parent_widget.file_path))
 
             except Exception as e:
                 print(e)
@@ -142,14 +142,13 @@ class Data_Processing_Stream_Thread(QThread):
         time_to_process = time()
 
         try:
-            if self.parent_widget.file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv':
+            if self.parent_widget.file_path[-len('Frequency.csv'):] == 'Frequency.csv':
                 self.process_frequency_data()
 
-            elif self.parent_widget.file_path_frequency_resistance[-len('Resistance.csv'):] == 'Resistance.csv':
+            elif self.parent_widget.file_path[-len('Resistance.csv'):] == 'Resistance.csv':
                 self.process_resistance_data()
 
-            if self.parent_widget.file_path_environment[-len('Environment.csv'):] == 'Environment.csv':
-                self.process_environment_data()
+            self.process_environment_data()
 
         except Exception as e:
             print ('ERROR: Processing Data Thread:', e)
@@ -159,12 +158,13 @@ class Data_Processing_Stream_Thread(QThread):
             sleep(0.1)
 
     def process_environment_data(self):
+        file_name = LOCAL_DIRECTORY_OF_SENSOR_DATA + 'E7_3A_23_33_CD_A5 - Thu Jul 13 10_13_41 2017 - Environment.csv'
 
         try:
             if DOWNLOADING_FILES:
                 return
 
-            with open(self.parent_widget.file_path_environment, 'r') as current_file:
+            with open(file_name, 'r') as current_file:
                 data = current_file.read().split('\n')
 
             temperature_time_duration_list = []
@@ -211,7 +211,7 @@ class Data_Processing_Stream_Thread(QThread):
             if DOWNLOADING_FILES:
                 return
 
-            with open(self.parent_widget.file_path_frequency_resistance, 'r') as current_file:
+            with open(self.parent_widget.file_path, 'r') as current_file:
                 data = current_file.read().split('\n')
 
             for key in self.sorted_keys:
@@ -257,7 +257,7 @@ class Data_Processing_Stream_Thread(QThread):
             if DOWNLOADING_FILES:
                 return
 
-            with open(self.parent_widget.file_path_frequency_resistance, 'r') as current_file:
+            with open(self.parent_widget.file_path, 'r') as current_file:
                 file_lines = current_file.read().split('\n')
 
             time_duration_list = []

@@ -18,40 +18,20 @@ from time import time
 # Developer Modules
 from graph_widget_threads import *
 
-def SELECT_LATEST_FILE_FREQUENCY_RESISTANCE(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
+def SELECT_LATEST_FILE(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
     latest_time = None
     latest_path = None
     first_loop = True
     for file_name in os.listdir(directory):
-        file_path_frequency_resistance = os.path.join(directory, file_name)
-        if os.path.isfile(file_path_frequency_resistance):
-            current_time = os.stat(file_path_frequency_resistance)
-            if not first_loop and int(current_time.st_mtime) > int(latest_time.st_mtime) and \
-                (file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv' or \
-                file_path_frequency_resistance[-len('Resistance.csv'):] == 'Resistance.csv'):
-                latest_time = os.stat(file_path_frequency_resistance)
-                latest_path = file_path_frequency_resistance
+        file_path = os.path.join(directory, file_name)
+        if os.path.isfile(file_path):
+            current_time = os.stat(file_path)
+            if not first_loop and int(current_time.st_mtime) > int(latest_time.st_mtime):
+                latest_time = os.stat(file_path)
+                latest_path = file_path
             elif first_loop:
-                latest_time = os.stat(file_path_frequency_resistance)
-                latest_path = file_path_frequency_resistance
-                first_loop = False
-    return latest_path
-
-def SELECT_LATEST_FILE_ENVIRONMENT(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
-    latest_time = None
-    latest_path = None
-    first_loop = True
-    for file_name in os.listdir(directory):
-        file_path_environment = os.path.join(directory, file_name)
-        if os.path.isfile(file_path_environment):
-            current_time = os.stat(file_path_environment)
-            if not first_loop and int(current_time.st_mtime) > int(latest_time.st_mtime) and \
-                file_path_environment[-len('Environment.csv'):] == 'Environment.csv':
-                latest_time = os.stat(file_path_environment)
-                latest_path = file_path_environment
-            elif first_loop:
-                latest_time = os.stat(file_path_environment)
-                latest_path = file_path_environment
+                latest_time = os.stat(file_path)
+                latest_path = file_path
                 first_loop = False
     return latest_path
 
@@ -59,19 +39,14 @@ class Graph_Window(GraphicsLayoutWidget):
     def __init__(self):
         super().__init__()
 
-        open_frequency_resistance_file_button = QPushButton('Open Frequency CSV', self)
-        open_frequency_resistance_file_button.resize(160, 50)
-        open_frequency_resistance_file_button.clicked.connect(self.select_file_frequency_resistance)
+        a = QPushButton('Open CSV', self)
+        a.resize(100, 50)
+        a.clicked.connect(self.select_file)
 
-        open_environment_file_button = QPushButton('Open Environment CSV', self)
-        open_environment_file_button.resize(180, 50)
-        open_environment_file_button.clicked.connect(self.select_file_environment)
-        open_environment_file_button.move(160, 0)
-
-        attempt_connection_button = QPushButton('Attempt Connection', self)
-        attempt_connection_button.resize(150, 50)
-        attempt_connection_button.clicked.connect(self.attempt_to_connect)
-        attempt_connection_button.move(340, 0)
+        b = QPushButton('Attempt Connection', self)
+        b.resize(150, 50)
+        b.clicked.connect(self.attempt_to_connect)
+        b.move(115, 0)
 
         self.resize (1920, 1080)
 
@@ -95,11 +70,14 @@ class Graph_Window(GraphicsLayoutWidget):
         self.nextRow()
         self.humidity_plot_graph    = self.addPlot(title = 'Humidity')
         self.nextRow()
+        self.overview_graph    = self.addPlot(title = 'Overview Graph')
+        self.overview_graph.addItem(self.linear_region)
 
         self.frequency_resistance_plot_graph.showGrid  (x = True, y = True)
         self.temperature_plot_graph.showGrid(x = True, y = True)
         self.pressure_plot_graph.showGrid   (x = True, y = True)
         self.humidity_plot_graph.showGrid   (x = True, y = True)
+        self.overview_graph.showGrid   (x = True, y = True)
 
         self.frequency_resistance_plot_graph.sigXRangeChanged.connect  (self.update_frequency_region)
         self.temperature_plot_graph.sigXRangeChanged.connect(self.update_temperature_region)
@@ -116,11 +94,16 @@ class Graph_Window(GraphicsLayoutWidget):
                                              symbol = 'o',
                                              name = 'Channel %d' % position))
 
+        #for curve in self.frequency_lines:
+        #    self.frequency_resistance_plot_graph.addItem(curve)
+
+
         self.resistance_line = self.frequency_resistance_plot_graph.plot(x=[],
                                  y=[],
                                  pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[position]),
                                  symbol = 'o',
                                  name = 'Resistance')
+        #self.frequency_resistance_plot_graph.addItem(self.resistance_line)
 
         self.temperature_line = self.temperature_plot_graph.plot(x=[],
                                          y=[],
@@ -140,9 +123,8 @@ class Graph_Window(GraphicsLayoutWidget):
 
         self.linear_region.sigRegionChanged.connect(self.update_plots_using_region)
 
-        self.file_path_frequency_resistance = SELECT_LATEST_FILE_FREQUENCY_RESISTANCE()
-        #self.file_path_environment = LOCAL_DIRECTORY_OF_SENSOR_DATA + 'E7_3A_23_33_CD_A5 - Fri Jul 14 16_58_43 2017 - Environment.csv'
-        self.file_path_environment = SELECT_LATEST_FILE_ENVIRONMENT()
+
+        self.file_path = SELECT_LATEST_FILE()
 
         ########################################################################
         # Data Processing Thread
@@ -174,27 +156,17 @@ class Graph_Window(GraphicsLayoutWidget):
         self.plot_timer_humidity.timeout.connect(self.plot_humidity_data)
         self.plot_timer_humidity.start(1000)
 
-    def select_file_frequency_resistance(self):
-        new_file_path_frequency_resistance = QFileDialog.getOpenFileName()[0]
-        if not new_file_path_frequency_resistance == '' and new_file_path_frequency_resistance[-len('.csv'):] == '.csv':
+    def select_file(self):
+        new_file_path = QFileDialog.getOpenFileName()[0]
+        if not new_file_path == '' and new_file_path[-len('.csv'):] == '.csv':
             self.clear_all_plots()
-            self.file_path_frequency_resistance = new_file_path_frequency_resistance
-
-    def select_file_environment(self):
-        new_file_path_environment = QFileDialog.getOpenFileName()[0]
-        if not new_file_path_environment == '' and new_file_path_environment[-len('.csv'):] == '.csv':
-            self.clear_all_plots()
-            self.file_path_frequency_resistance = new_file_path_environment
-
+            self.file_path = new_file_path
 
     def clear_all_plots(self):
         for curve in self.frequency_lines:
             curve.clear()
 
         self.resistance_line.clear()
-        self.temperature_line.clear()
-        self.pressure_line.clear()
-        self.humidity_line.clear()
 
     def attempt_to_connect(self):
         if self.server_handler.attempt_connection:
@@ -205,14 +177,14 @@ class Graph_Window(GraphicsLayoutWidget):
     def plot_frequency_or_resistance_data(self):
         try:
 
-            if self.file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv':
+            if self.file_path[-len('Frequency.csv'):] == 'Frequency.csv':
                 if not self.process_data_thread.frequency_queue.empty():
                     self.frequency_resistance_plot_graph.setTitle ('Resonant Frequency')
                     self.frequency_resistance_plot_graph.setLabel ('left', 'Frequency (MHz)')
                     self.frequency_resistance_plot_graph.setLabel ('bottom', 'Time (s)')
                     self.plot_frequency_data()
 
-            elif self.file_path_frequency_resistance[-len('Resistance.csv'):] == 'Resistance.csv':
+            elif self.file_path[-len('Resistance.csv'):] == 'Resistance.csv':
                 if not self.process_data_thread.resistance_queue.empty():
                     self.frequency_resistance_plot_graph.setTitle ('Resistance')
                     self.frequency_resistance_plot_graph.setLabel ('left', 'Resistance (Ohms)')
@@ -278,6 +250,6 @@ class Graph_Window(GraphicsLayoutWidget):
         self.temperature_plot_graph.show()
         self.pressure_plot_graph.show()
         self.humidity_plot_graph.show()
-        #self.overview_graph.show()
+        self.overview_graph.show()
 
         self.show()
