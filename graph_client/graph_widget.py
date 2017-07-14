@@ -204,6 +204,8 @@ class Graph_Window(GraphicsLayoutWidget):
 
     def plot_frequency_or_resistance_data(self):
         try:
+            if self.file_path_frequency_resistance is None:
+                return
 
             if self.file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv':
                 if not self.process_data_thread.frequency_queue.empty():
@@ -238,21 +240,24 @@ class Graph_Window(GraphicsLayoutWidget):
     def plot_temperature_data(self):
         self.temperature_plot_graph.setLabel ('left', 'Temperature (C)')
         self.temperature_plot_graph.setLabel ('bottom', 'Time (S)')
-
-        self.temperature_line.setData(*self.process_data_thread.get_temperature_data())
+        if not self.process_data_thread.temperature_queue.empty():
+            self.temperature_line.setData(*self.process_data_thread.get_temperature_data())
 
 
     def plot_pressure_data(self):
         self.pressure_plot_graph.setLabel ('left', 'Pa')
         self.pressure_plot_graph.setLabel ('bottom', 'Time (S)')
 
-        self.pressure_line.setData(*self.process_data_thread.get_pressure_data())
+        if not self.process_data_thread.pressure_queue.empty():
+            self.pressure_line.setData(*self.process_data_thread.get_pressure_data())
 
     def plot_humidity_data(self):
         self.humidity_plot_graph.setLabel ('left', '% Rh')
         self.humidity_plot_graph.setLabel ('bottom', 'Time (S)')
 
-        self.humidity_line.setData(*self.process_data_thread.get_humidity_data())
+
+        if not self.process_data_thread.humidity_queue.empty():
+            self.humidity_line.setData(*self.process_data_thread.get_humidity_data())
 
     # When the region changes then this function will change the plots accordingly
     def update_plots_using_region(self):

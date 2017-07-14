@@ -142,13 +142,17 @@ class Data_Processing_Stream_Thread(QThread):
         time_to_process = time()
 
         try:
-            if self.parent_widget.file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv':
+            if self.parent_widget.file_path_frequency_resistance is None:
+                pass
+            elif self.parent_widget.file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv':
                 self.process_frequency_data()
 
             elif self.parent_widget.file_path_frequency_resistance[-len('Resistance.csv'):] == 'Resistance.csv':
                 self.process_resistance_data()
 
-            if self.parent_widget.file_path_environment[-len('Environment.csv'):] == 'Environment.csv':
+            if self.parent_widget.file_path_environment is None:
+                pass
+            elif self.parent_widget.file_path_environment[-len('Environment.csv'):] == 'Environment.csv':
                 self.process_environment_data()
 
         except Exception as e:
