@@ -109,67 +109,67 @@ class Graph_Window(GraphicsLayoutWidget):
 
         channel_button_x_location_start = 490
         length_of_button = 100
-        graph_channel_one_button = QPushButton('Graph Channel 0', self)
-        graph_channel_one_button.resize(length_of_button, button_width)
-        graph_channel_one_button.clicked.connect(self.switch_frequency_plot_channel_one)
-        graph_channel_one_button.move(channel_button_x_location_start, 0)
-        graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
+        self.graph_channel_one_button = QPushButton('Graph Channel 0', self)
+        self.graph_channel_one_button.resize(length_of_button, button_width)
+        self.graph_channel_one_button.clicked.connect(self.switch_frequency_plot_channel_one)
+        self.graph_channel_one_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
 
 
         channel_button_x_location_start += length_of_button
-        graph_channel_two_button = QPushButton('Graph Channel 1', self)
-        graph_channel_two_button.resize(length_of_button, button_width)
-        graph_channel_two_button.clicked.connect(self.switch_frequency_plot_channel_two)
-        graph_channel_two_button.move(channel_button_x_location_start, 0)
-        graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
+        self.graph_channel_two_button = QPushButton('Graph Channel 1', self)
+        self.graph_channel_two_button.resize(length_of_button, button_width)
+        self.graph_channel_two_button.clicked.connect(self.switch_frequency_plot_channel_two)
+        self.graph_channel_two_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
 
 
         channel_button_x_location_start += length_of_button
-        graph_channel_three_button = QPushButton('Graph Channel 2', self)
-        graph_channel_three_button.resize(length_of_button, button_width)
-        graph_channel_three_button.clicked.connect(self.switch_frequency_plot_channel_three)
-        graph_channel_three_button.move(channel_button_x_location_start, 0)
-        graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
+        self.graph_channel_three_button = QPushButton('Graph Channel 2', self)
+        self.graph_channel_three_button.resize(length_of_button, button_width)
+        self.graph_channel_three_button.clicked.connect(self.switch_frequency_plot_channel_three)
+        self.graph_channel_three_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
 
 
         channel_button_x_location_start += length_of_button
-        graph_channel_four_button = QPushButton('Graph Channel 3', self)
-        graph_channel_four_button.resize(length_of_button, button_width)
-        graph_channel_four_button.clicked.connect(self.switch_frequency_plot_channel_four)
-        graph_channel_four_button.move(channel_button_x_location_start, 0)
-        graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
+        self.graph_channel_four_button = QPushButton('Graph Channel 3', self)
+        self.graph_channel_four_button.resize(length_of_button, button_width)
+        self.graph_channel_four_button.clicked.connect(self.switch_frequency_plot_channel_four)
+        self.graph_channel_four_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
 
 
         channel_button_x_location_start += length_of_button
-        graph_channel_five_button = QPushButton('Graph Channel 4', self)
-        graph_channel_five_button.resize(length_of_button, button_width)
-        graph_channel_five_button.clicked.connect(self.switch_frequency_plot_channel_five)
-        graph_channel_five_button.move(channel_button_x_location_start, 0)
-        graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
+        self.graph_channel_five_button = QPushButton('Graph Channel 4', self)
+        self.graph_channel_five_button.resize(length_of_button, button_width)
+        self.graph_channel_five_button.clicked.connect(self.switch_frequency_plot_channel_five)
+        self.graph_channel_five_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
 
 
         channel_button_x_location_start += length_of_button
-        graph_channel_six_button = QPushButton('Graph Channel 5', self)
-        graph_channel_six_button.resize(length_of_button, button_width)
-        graph_channel_six_button.clicked.connect(self.switch_frequency_plot_channel_six)
-        graph_channel_six_button.move(channel_button_x_location_start, 0)
-        graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
+        self.graph_channel_six_button = QPushButton('Graph Channel 5', self)
+        self.graph_channel_six_button.resize(length_of_button, button_width)
+        self.graph_channel_six_button.clicked.connect(self.switch_frequency_plot_channel_six)
+        self.graph_channel_six_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
 
 
         channel_button_x_location_start += length_of_button
-        graph_channel_seven_button = QPushButton('Graph Channel 6', self)
-        graph_channel_seven_button.resize(length_of_button, button_width)
-        graph_channel_seven_button.clicked.connect(self.switch_frequency_plot_channel_seven)
-        graph_channel_seven_button.move(channel_button_x_location_start, 0)
-        graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
+        self.graph_channel_seven_button = QPushButton('Graph Channel 6', self)
+        self.graph_channel_seven_button.resize(length_of_button, button_width)
+        self.graph_channel_seven_button.clicked.connect(self.switch_frequency_plot_channel_seven)
+        self.graph_channel_seven_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
 
 
         channel_button_x_location_start += length_of_button
-        graph_channel_eight_button = QPushButton('Graph Channel 7', self)
-        graph_channel_eight_button.resize(length_of_button, button_width)
-        graph_channel_eight_button.clicked.connect(self.switch_frequency_plot_channel_eight)
-        graph_channel_eight_button.move(channel_button_x_location_start, 0)
-        graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
+        self.graph_channel_eight_button = QPushButton('Graph Channel 7', self)
+        self.graph_channel_eight_button.resize(length_of_button, button_width)
+        self.graph_channel_eight_button.clicked.connect(self.switch_frequency_plot_channel_eight)
+        self.graph_channel_eight_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
 
 
 
@@ -218,24 +218,28 @@ class Graph_Window(GraphicsLayoutWidget):
 
         self.resistance_line = self.frequency_resistance_plot_graph.plot(x=[],
                                          y=[],
-                                         pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[position]),
+                                         pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[0]),
                                          symbol = 'o',
+                                         symbolBrush = pg.mkBrush(LINE_COLORS[0]),
                                          name = 'Resistance')
 
         self.temperature_line = self.temperature_plot_graph.plot(x=[],
                                          y=[],
                                          pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[1]),
                                          symbol = 'o',
+                                         symbolBrush = pg.mkBrush(LINE_COLORS[1]),
                                          name = 'Temperature')
         self.pressure_line = self.pressure_plot_graph.plot(x=[],
                                          y=[],
                                          pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[2]),
                                          symbol = 'o',
+                                         symbolBrush = pg.mkBrush(LINE_COLORS[2]),
                                          name = 'Pressure')
         self.humidity_line = self.humidity_plot_graph.plot(x=[],
                                          y=[],
                                          pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[3]),
                                          symbol = 'o',
+                                         symbolBrush = pg.mkBrush(LINE_COLORS[3]),
                                          name = 'Humidity')
 
         self.linear_region.sigRegionChanged.connect(self.update_plots_using_region)
@@ -286,50 +290,69 @@ class Graph_Window(GraphicsLayoutWidget):
     def switch_frequency_plot_channel_one(self):
         if self.plot_channel_key_booleans[0]:
             self.plot_channel_key_booleans[0] = False
+            self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+
         else:
             self.plot_channel_key_booleans[0]  = True
+            self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
+
 
     def switch_frequency_plot_channel_two(self):
         if self.plot_channel_key_booleans[1]:
             self.plot_channel_key_booleans[1] = False
+            self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
         else:
             self.plot_channel_key_booleans[1]  = True
+            self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
 
     def switch_frequency_plot_channel_three(self):
         if self.plot_channel_key_booleans[2]:
             self.plot_channel_key_booleans[2] = False
+            self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+
         else:
             self.plot_channel_key_booleans[2]  = True
+            self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
 
     def switch_frequency_plot_channel_four(self):
         if self.plot_channel_key_booleans[3]:
             self.plot_channel_key_booleans[3] = False
+            self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
         else:
             self.plot_channel_key_booleans[3]  = True
+            self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
 
     def switch_frequency_plot_channel_five(self):
         if self.plot_channel_key_booleans[4]:
             self.plot_channel_key_booleans[4] = False
+            self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
         else:
             self.plot_channel_key_booleans[4]  = True
+            self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
 
     def switch_frequency_plot_channel_six(self):
         if self.plot_channel_key_booleans[5]:
             self.plot_channel_key_booleans[5] = False
+            self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
         else:
             self.plot_channel_key_booleans[5]  = True
+            self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
 
     def switch_frequency_plot_channel_seven(self):
         if self.plot_channel_key_booleans[6]:
             self.plot_channel_key_booleans[6] = False
+            self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
         else:
             self.plot_channel_key_booleans[6]  = True
+            self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
 
     def switch_frequency_plot_channel_eight(self):
         if self.plot_channel_key_booleans[7]:
             self.plot_channel_key_booleans[7] = False
+            self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
         else:
             self.plot_channel_key_booleans[7]  = True
+            self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
 
     def clear_all_plots(self):
         for curve in self.frequency_lines:
