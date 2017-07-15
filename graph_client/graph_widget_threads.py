@@ -122,7 +122,6 @@ class Data_Processing_Stream_Thread(QThread):
         self.humidity_queue = Queue(2)
         self.sorted_keys = sorted(self.directory_of_frequency_channels.keys())
 
-
         self.time_until_next_server_update = time()
 
     def stop_thread(self):

@@ -213,6 +213,7 @@ class Graph_Window(GraphicsLayoutWidget):
                                              y=[],
                                              pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[position]),
                                              symbol = 'o',
+                                             symbolBrush = pg.mkBrush(LINE_COLORS[position]),
                                              name = 'Channel %d' % position))
 
         self.resistance_line = self.frequency_resistance_plot_graph.plot(x=[],
