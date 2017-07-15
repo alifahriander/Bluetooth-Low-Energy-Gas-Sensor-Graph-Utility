@@ -59,21 +59,120 @@ class Graph_Window(GraphicsLayoutWidget):
     def __init__(self):
         super().__init__()
 
+        self.resize (1920, 1080)
+
+        button_width = 19
+
+        ########################################################################
+        # File Manipulation Buttons
+        ########################################################################
+
         open_frequency_resistance_file_button = QPushButton('Open Frequency CSV', self)
-        open_frequency_resistance_file_button.resize(160, 50)
+        open_frequency_resistance_file_button.resize(160, button_width)
         open_frequency_resistance_file_button.clicked.connect(self.select_file_frequency_resistance)
 
         open_environment_file_button = QPushButton('Open Environment CSV', self)
-        open_environment_file_button.resize(180, 50)
+        open_environment_file_button.resize(180, button_width)
         open_environment_file_button.clicked.connect(self.select_file_environment)
         open_environment_file_button.move(160, 0)
 
+        ########################################################################
+        # Attempt Connection Buttons
+        ########################################################################
+
         attempt_connection_button = QPushButton('Attempt Connection', self)
-        attempt_connection_button.resize(150, 50)
+        attempt_connection_button.resize(150, button_width)
         attempt_connection_button.clicked.connect(self.attempt_to_connect)
         attempt_connection_button.move(340, 0)
 
-        self.resize (1920, 1080)
+        ########################################################################
+        # Plot Channel Plotting Booleans
+        ########################################################################
+        self.plot_channel_one   = True
+        self.plot_channel_two   = True
+        self.plot_channel_three = True
+        self.plot_channel_four  = True
+        self.plot_channel_five  = True
+        self.plot_channel_six   = True
+        self.plot_channel_seven = True
+        self.plot_channel_eight = True
+
+        # The position of this list corispond to the position of the sorted directory_of_frequency_channels keys
+        self.plot_channel_key_booleans = []
+        for count in range( len(DICTIONARY_OF_CHANNEL_KEYS.keys()) ):
+            self.plot_channel_key_booleans.append(True)
+
+
+        ########################################################################
+        # Graph Channel Buttons
+        ########################################################################
+
+        channel_button_x_location_start = 490
+        length_of_button = 100
+        graph_channel_one_button = QPushButton('Graph Channel 0', self)
+        graph_channel_one_button.resize(length_of_button, button_width)
+        graph_channel_one_button.clicked.connect(self.switch_frequency_plot_channel_one)
+        graph_channel_one_button.move(channel_button_x_location_start, 0)
+        graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
+
+
+        channel_button_x_location_start += length_of_button
+        graph_channel_two_button = QPushButton('Graph Channel 1', self)
+        graph_channel_two_button.resize(length_of_button, button_width)
+        graph_channel_two_button.clicked.connect(self.switch_frequency_plot_channel_two)
+        graph_channel_two_button.move(channel_button_x_location_start, 0)
+        graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
+
+
+        channel_button_x_location_start += length_of_button
+        graph_channel_three_button = QPushButton('Graph Channel 2', self)
+        graph_channel_three_button.resize(length_of_button, button_width)
+        graph_channel_three_button.clicked.connect(self.switch_frequency_plot_channel_three)
+        graph_channel_three_button.move(channel_button_x_location_start, 0)
+        graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
+
+
+        channel_button_x_location_start += length_of_button
+        graph_channel_four_button = QPushButton('Graph Channel 3', self)
+        graph_channel_four_button.resize(length_of_button, button_width)
+        graph_channel_four_button.clicked.connect(self.switch_frequency_plot_channel_four)
+        graph_channel_four_button.move(channel_button_x_location_start, 0)
+        graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
+
+
+        channel_button_x_location_start += length_of_button
+        graph_channel_five_button = QPushButton('Graph Channel 4', self)
+        graph_channel_five_button.resize(length_of_button, button_width)
+        graph_channel_five_button.clicked.connect(self.switch_frequency_plot_channel_five)
+        graph_channel_five_button.move(channel_button_x_location_start, 0)
+        graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
+
+
+        channel_button_x_location_start += length_of_button
+        graph_channel_six_button = QPushButton('Graph Channel 5', self)
+        graph_channel_six_button.resize(length_of_button, button_width)
+        graph_channel_six_button.clicked.connect(self.switch_frequency_plot_channel_six)
+        graph_channel_six_button.move(channel_button_x_location_start, 0)
+        graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
+
+
+        channel_button_x_location_start += length_of_button
+        graph_channel_seven_button = QPushButton('Graph Channel 6', self)
+        graph_channel_seven_button.resize(length_of_button, button_width)
+        graph_channel_seven_button.clicked.connect(self.switch_frequency_plot_channel_seven)
+        graph_channel_seven_button.move(channel_button_x_location_start, 0)
+        graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
+
+
+        channel_button_x_location_start += length_of_button
+        graph_channel_eight_button = QPushButton('Graph Channel 7', self)
+        graph_channel_eight_button.resize(length_of_button, button_width)
+        graph_channel_eight_button.clicked.connect(self.switch_frequency_plot_channel_eight)
+        graph_channel_eight_button.move(channel_button_x_location_start, 0)
+        graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
+
+
+
 
         ########################################################################
         # Init of linear region that can control all graphs at once
@@ -117,10 +216,10 @@ class Graph_Window(GraphicsLayoutWidget):
                                              name = 'Channel %d' % position))
 
         self.resistance_line = self.frequency_resistance_plot_graph.plot(x=[],
-                                 y=[],
-                                 pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[position]),
-                                 symbol = 'o',
-                                 name = 'Resistance')
+                                         y=[],
+                                         pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[position]),
+                                         symbol = 'o',
+                                         name = 'Resistance')
 
         self.temperature_line = self.temperature_plot_graph.plot(x=[],
                                          y=[],
@@ -153,8 +252,6 @@ class Graph_Window(GraphicsLayoutWidget):
         self.process_data_thread = Data_Processing_Stream_Thread(self)
         self.process_data_thread.start()
 
-
-
         ########################################################################
         # Timers
         ########################################################################
@@ -186,6 +283,53 @@ class Graph_Window(GraphicsLayoutWidget):
             self.clear_all_plots()
             self.file_path_frequency_resistance = new_file_path_environment
 
+    def switch_frequency_plot_channel_one(self):
+        if self.plot_channel_key_booleans[0]:
+            self.plot_channel_key_booleans[0] = False
+        else:
+            self.plot_channel_key_booleans[0]  = True
+
+    def switch_frequency_plot_channel_two(self):
+        if self.plot_channel_key_booleans[1]:
+            self.plot_channel_key_booleans[1] = False
+        else:
+            self.plot_channel_key_booleans[1]  = True
+
+    def switch_frequency_plot_channel_three(self):
+        if self.plot_channel_key_booleans[2]:
+            self.plot_channel_key_booleans[2] = False
+        else:
+            self.plot_channel_key_booleans[2]  = True
+
+    def switch_frequency_plot_channel_four(self):
+        if self.plot_channel_key_booleans[3]:
+            self.plot_channel_key_booleans[3] = False
+        else:
+            self.plot_channel_key_booleans[3]  = True
+
+    def switch_frequency_plot_channel_five(self):
+        if self.plot_channel_key_booleans[4]:
+            self.plot_channel_key_booleans[4] = False
+        else:
+            self.plot_channel_key_booleans[4]  = True
+
+    def switch_frequency_plot_channel_six(self):
+        if self.plot_channel_key_booleans[5]:
+            self.plot_channel_key_booleans[5] = False
+        else:
+            self.plot_channel_key_booleans[5]  = True
+
+    def switch_frequency_plot_channel_seven(self):
+        if self.plot_channel_key_booleans[6]:
+            self.plot_channel_key_booleans[6] = False
+        else:
+            self.plot_channel_key_booleans[6]  = True
+
+    def switch_frequency_plot_channel_eight(self):
+        if self.plot_channel_key_booleans[7]:
+            self.plot_channel_key_booleans[7] = False
+        else:
+            self.plot_channel_key_booleans[7]  = True
 
     def clear_all_plots(self):
         for curve in self.frequency_lines:
@@ -230,7 +374,10 @@ class Graph_Window(GraphicsLayoutWidget):
         sorted_keys = sorted_keys = sorted(directory_of_frequency_channels.keys())
 
         for position, key in enumerate(sorted_keys):
-            self.frequency_lines[position].setData(x = directory_of_frequency_channels[key]['x'], y = directory_of_frequency_channels[key]['y'])
+            if self.plot_channel_key_booleans[position]:
+                self.frequency_lines[position].setData(x = directory_of_frequency_channels[key]['x'], y = directory_of_frequency_channels[key]['y'])
+            else:
+                self.frequency_lines[position].setData([],[])
 
     def plot_resistance_data(self):
         time_duration_list, resistance_list = self.process_data_thread.get_resistance_data()
