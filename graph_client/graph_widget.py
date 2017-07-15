@@ -241,7 +241,6 @@ class Graph_Window(GraphicsLayoutWidget):
         self.linear_region.sigRegionChanged.connect(self.update_plots_using_region)
 
         self.file_path_frequency_resistance = SELECT_LATEST_FILE_FREQUENCY_RESISTANCE()
-        #self.file_path_environment = LOCAL_DIRECTORY_OF_SENSOR_DATA + 'E7_3A_23_33_CD_A5 - Fri Jul 14 16_58_43 2017 - Environment.csv'
         self.file_path_environment = SELECT_LATEST_FILE_ENVIRONMENT()
 
         ########################################################################
