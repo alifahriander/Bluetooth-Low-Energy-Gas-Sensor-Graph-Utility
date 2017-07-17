@@ -171,6 +171,13 @@ class Graph_Window(GraphicsLayoutWidget):
         self.graph_channel_eight_button.move(channel_button_x_location_start, 0)
         self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
 
+        channel_button_x_location_start += length_of_button
+        self.graph_channel_eight_button = QPushButton('Download All Files', self)
+        self.graph_channel_eight_button.resize(length_of_button + 50, button_width)
+        self.graph_channel_eight_button.clicked.connect(self.download_all_files)
+        self.graph_channel_eight_button.move(channel_button_x_location_start, 0)
+        self.graph_channel_eight_button.setStyleSheet("background-color:rgb(255,255,255)")
+
 
 
 
@@ -278,6 +285,9 @@ class Graph_Window(GraphicsLayoutWidget):
         self.plot_timer_humidity.timeout.connect(self.plot_humidity_data)
         self.plot_timer_humidity.start(1000)
 
+    def download_all_files(self):
+        self.server_handler.get_sensor_data_from_server()
+        
     def select_file_frequency_resistance(self):
         new_file_path_frequency_resistance = QFileDialog.getOpenFileName()[0]
         if not new_file_path_frequency_resistance == '' and new_file_path_frequency_resistance[-len('.csv'):] == '.csv':
