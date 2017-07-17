@@ -95,6 +95,7 @@ class Server_Handler(QThread):
             try:
                 if self.attempt_connection:
                     self.get_file_from_server(str(self.parent_widget.file_path_frequency_resistance))
+                    self.get_file_from_server(str(self.parent_widget.file_path_environment))
 
             except Exception as e:
                 print(e)

@@ -108,7 +108,7 @@ class Graph_Window(GraphicsLayoutWidget):
         ########################################################################
 
         channel_button_x_location_start = 490
-        length_of_button = 100
+        length_of_button = 150
         self.graph_channel_one_button = QPushButton('Graph Channel 0', self)
         self.graph_channel_one_button.resize(length_of_button, button_width)
         self.graph_channel_one_button.clicked.connect(self.switch_frequency_plot_channel_one)
@@ -194,11 +194,14 @@ class Graph_Window(GraphicsLayoutWidget):
         self.nextRow()
         self.humidity_plot_graph    = self.addPlot(title = 'Humidity')
         self.nextRow()
+        self.overview_graph    = self.addPlot(title = 'Overview')
+        self.overview_graph.addItem(self.linear_region)
 
         self.frequency_resistance_plot_graph.showGrid  (x = True, y = True)
         self.temperature_plot_graph.showGrid(x = True, y = True)
         self.pressure_plot_graph.showGrid   (x = True, y = True)
         self.humidity_plot_graph.showGrid   (x = True, y = True)
+        self.overview_graph.showGrid   (x = True, y = True)
 
         self.frequency_resistance_plot_graph.sigXRangeChanged.connect  (self.update_frequency_region)
         self.temperature_plot_graph.sigXRangeChanged.connect(self.update_temperature_region)
