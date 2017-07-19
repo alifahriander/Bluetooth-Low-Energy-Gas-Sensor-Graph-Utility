@@ -18,40 +18,21 @@ from time import time
 # Developer Modules
 from graph_widget_threads import *
 
-def SELECT_LATEST_FILE_FREQUENCY_RESISTANCE(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
+def SELECT_LATEST_FILE_JSON(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
     latest_time = None
     latest_path = None
     first_loop = True
     for file_name in os.listdir(directory):
-        file_path_frequency_resistance = os.path.join(directory, file_name)
-        if os.path.isfile(file_path_frequency_resistance):
-            current_time = os.stat(file_path_frequency_resistance)
+        file_path_json = os.path.join(directory, file_name)
+        if os.path.isfile(file_path_json):
+            current_time = os.stat(file_path_json)
             if not first_loop and int(current_time.st_mtime) > int(latest_time.st_mtime) and \
-                (file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv' or \
-                file_path_frequency_resistance[-len('Resistance.csv'):] == 'Resistance.csv'):
-                latest_time = os.stat(file_path_frequency_resistance)
-                latest_path = file_path_frequency_resistance
+                file_path_json[-len('.json'):] == '.json':
+                latest_time = os.stat(file_path_json)
+                latest_path = file_path_json
             elif first_loop:
-                latest_time = os.stat(file_path_frequency_resistance)
-                latest_path = file_path_frequency_resistance
-                first_loop = False
-    return latest_path
-
-def SELECT_LATEST_FILE_ENVIRONMENT(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
-    latest_time = None
-    latest_path = None
-    first_loop = True
-    for file_name in os.listdir(directory):
-        file_path_environment = os.path.join(directory, file_name)
-        if os.path.isfile(file_path_environment):
-            current_time = os.stat(file_path_environment)
-            if not first_loop and int(current_time.st_mtime) > int(latest_time.st_mtime) and \
-                file_path_environment[-len('Environment.csv'):] == 'Environment.csv':
-                latest_time = os.stat(file_path_environment)
-                latest_path = file_path_environment
-            elif first_loop:
-                latest_time = os.stat(file_path_environment)
-                latest_path = file_path_environment
+                latest_time = os.stat(file_path_json)
+                latest_path = file_path_json
                 first_loop = False
     return latest_path
 
@@ -67,14 +48,9 @@ class Graph_Window(GraphicsLayoutWidget):
         # File Manipulation Buttons
         ########################################################################
 
-        open_frequency_resistance_file_button = QPushButton('Open Frequency CSV', self)
+        open_frequency_resistance_file_button = QPushButton('Open Json', self)
         open_frequency_resistance_file_button.resize(160, button_width)
-        open_frequency_resistance_file_button.clicked.connect(self.select_file_frequency_resistance)
-
-        open_environment_file_button = QPushButton('Open Environment CSV', self)
-        open_environment_file_button.resize(180, button_width)
-        open_environment_file_button.clicked.connect(self.select_file_environment)
-        open_environment_file_button.move(160, 0)
+        open_frequency_resistance_file_button.clicked.connect(self.select_json_file)
 
         ########################################################################
         # Attempt Connection Buttons
@@ -172,14 +148,11 @@ class Graph_Window(GraphicsLayoutWidget):
         self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
 
         channel_button_x_location_start += length_of_button
-        self.graph_channel_eight_button = QPushButton('Download All Files', self)
-        self.graph_channel_eight_button.resize(length_of_button + 50, button_width)
-        self.graph_channel_eight_button.clicked.connect(self.download_all_files)
-        self.graph_channel_eight_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_eight_button.setStyleSheet("background-color:rgb(255,255,255)")
-
-
-
+        self.download_all_files_button = QPushButton('Download All Files', self)
+        self.download_all_files_button.resize(length_of_button + 50, button_width)
+        self.download_all_files_button.clicked.connect(self.download_all_files)
+        self.download_all_files_button.move(channel_button_x_location_start, 0)
+        self.download_all_files_button.setStyleSheet("background-color:rgb(255,255,255)")
 
         ########################################################################
         # Init of linear region that can control all graphs at once
@@ -191,8 +164,11 @@ class Graph_Window(GraphicsLayoutWidget):
         # Init of all plot widgets
         ########################################################################
 
-        self.frequency_resistance_plot_graph   = self.addPlot(title = 'Frequency')
-        self.frequency_resistance_legend = self.frequency_resistance_plot_graph.addLegend()
+        self.frequency_plot_graph   = self.addPlot(title = 'Frequency')
+        self.frequency_resistance_legend = self.frequency_plot_graph.addLegend()
+
+        self.nextRow()
+        self.resistance_graph = self.addPlot(title = 'Resistance')
 
         self.nextRow()
         self.temperature_plot_graph = self.addPlot(title = 'Temperature')
@@ -204,13 +180,15 @@ class Graph_Window(GraphicsLayoutWidget):
         self.overview_graph    = self.addPlot(title = 'Overview')
         self.overview_graph.addItem(self.linear_region)
 
-        self.frequency_resistance_plot_graph.showGrid  (x = True, y = True)
+        self.frequency_plot_graph.showGrid  (x = True, y = True)
+        self.resistance_graph.showGrid(x = True, y = True)
         self.temperature_plot_graph.showGrid(x = True, y = True)
         self.pressure_plot_graph.showGrid   (x = True, y = True)
         self.humidity_plot_graph.showGrid   (x = True, y = True)
         self.overview_graph.showGrid   (x = True, y = True)
 
-        self.frequency_resistance_plot_graph.sigXRangeChanged.connect  (self.update_frequency_region)
+        self.frequency_plot_graph.sigXRangeChanged.connect  (self.update_frequency_region)
+        self.resistance_graph.sigXRangeChanged.connect  (self.update_resistance_region)
         self.temperature_plot_graph.sigXRangeChanged.connect(self.update_temperature_region)
         self.pressure_plot_graph.sigXRangeChanged.connect   (self.update_pressure_region)
         self.humidity_plot_graph.sigXRangeChanged.connect   (self.update_humidity_region)
@@ -219,14 +197,14 @@ class Graph_Window(GraphicsLayoutWidget):
 
         for position in range(0, len(DICTIONARY_OF_CHANNEL_KEYS.keys())):
 
-            self.frequency_lines.append( self.frequency_resistance_plot_graph.plot(x=[],
+            self.frequency_lines.append( self.frequency_plot_graph.plot(x=[],
                                              y=[],
                                              pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[position]),
                                              symbol = 'o',
                                              symbolBrush = pg.mkBrush(LINE_COLORS[position]),
                                              name = 'Channel %d' % position))
 
-        self.resistance_line = self.frequency_resistance_plot_graph.plot(x=[],
+        self.resistance_line = self.resistance_graph.plot(x=[],
                                          y=[],
                                          pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[0]),
                                          symbol = 'o',
@@ -254,13 +232,12 @@ class Graph_Window(GraphicsLayoutWidget):
 
         self.linear_region.sigRegionChanged.connect(self.update_plots_using_region)
 
-        self.file_path_frequency_resistance = SELECT_LATEST_FILE_FREQUENCY_RESISTANCE()
-        self.file_path_environment = SELECT_LATEST_FILE_ENVIRONMENT()
+        self.file_path_json = SELECT_LATEST_FILE_JSON()
 
         ########################################################################
         # Data Processing Thread
         ########################################################################
-        self.server_handler = Server_Handler(self)
+        self.server_handler = Server_Handler(self, attempt_connection_button)
         self.server_handler.start()
 
         self.process_data_thread = Data_Processing_Stream_Thread(self)
@@ -269,9 +246,13 @@ class Graph_Window(GraphicsLayoutWidget):
         ########################################################################
         # Timers
         ########################################################################
-        self.plot_timer_frequency_resistance = QtCore.QTimer()
-        self.plot_timer_frequency_resistance.timeout.connect(self.plot_frequency_or_resistance_data)
-        self.plot_timer_frequency_resistance.start(1000)
+        self.plot_timer_frequency = QtCore.QTimer()
+        self.plot_timer_frequency.timeout.connect(self.plot_frequency_data)
+        self.plot_timer_frequency.start(1000)
+
+        self.plot_timer_resistance = QtCore.QTimer()
+        self.plot_timer_resistance.timeout.connect(self.plot_resistance_data)
+        self.plot_timer_resistance.start(1000)
 
         self.plot_timer_temperature = QtCore.QTimer()
         self.plot_timer_temperature.timeout.connect(self.plot_temperature_data)
@@ -287,18 +268,14 @@ class Graph_Window(GraphicsLayoutWidget):
 
     def download_all_files(self):
         self.server_handler.get_sensor_data_from_server()
-        
-    def select_file_frequency_resistance(self):
-        new_file_path_frequency_resistance = QFileDialog.getOpenFileName()[0]
-        if not new_file_path_frequency_resistance == '' and new_file_path_frequency_resistance[-len('.csv'):] == '.csv':
-            self.clear_all_plots()
-            self.file_path_frequency_resistance = new_file_path_frequency_resistance
 
-    def select_file_environment(self):
-        new_file_path_environment = QFileDialog.getOpenFileName()[0]
-        if not new_file_path_environment == '' and new_file_path_environment[-len('.csv'):] == '.csv':
+    def select_json_file(self):
+        new_file_path_json = QFileDialog.getOpenFileName()[0]
+        if not new_file_path_json == '' and new_file_path_json[-len('.json'):] == '.json':
             self.clear_all_plots()
-            self.file_path_frequency_resistance = new_file_path_environment
+            self.file_path_json = new_file_path_json
+
+
 
     def switch_frequency_plot_channel_one(self):
         if self.plot_channel_key_booleans[0]:
@@ -384,21 +361,21 @@ class Graph_Window(GraphicsLayoutWidget):
 
     def plot_frequency_or_resistance_data(self):
         try:
-            if self.file_path_frequency_resistance is None:
+            if self.file_path_json is None:
                 return
 
-            if self.file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv':
+            if self.file_path_json[-len('Frequency.csv'):] == 'Frequency.csv':
                 if not self.process_data_thread.frequency_queue.empty():
-                    self.frequency_resistance_plot_graph.setTitle ('Resonant Frequency')
-                    self.frequency_resistance_plot_graph.setLabel ('left', 'Frequency (MHz)')
-                    self.frequency_resistance_plot_graph.setLabel ('bottom', 'Time (s)')
+                    self.frequency_plot_graph.setTitle ('Resonant Frequency')
+                    self.frequency_plot_graph.setLabel ('left', 'Frequency (MHz)')
+                    self.frequency_plot_graph.setLabel ('bottom', 'Time (s)')
                     self.plot_frequency_data()
 
-            elif self.file_path_frequency_resistance[-len('Resistance.csv'):] == 'Resistance.csv':
+            elif self.file_path_json[-len('Resistance.csv'):] == 'Resistance.csv':
                 if not self.process_data_thread.resistance_queue.empty():
-                    self.frequency_resistance_plot_graph.setTitle ('Resistance')
-                    self.frequency_resistance_plot_graph.setLabel ('left', 'Resistance (Ohms)')
-                    self.frequency_resistance_plot_graph.setLabel ('bottom', 'Time (s)')
+                    self.frequency_plot_graph.setTitle ('Resistance')
+                    self.frequency_plot_graph.setLabel ('left', 'Resistance (Ohms)')
+                    self.frequency_plot_graph.setLabel ('bottom', 'Time (s)')
                     self.plot_resistance_data()
 
         except Exception as e:
@@ -406,51 +383,70 @@ class Graph_Window(GraphicsLayoutWidget):
 
     def plot_frequency_data(self):
 
-        directory_of_frequency_channels = self.process_data_thread.get_frequency_data()
-        sorted_keys = sorted_keys = sorted(directory_of_frequency_channels.keys())
+        try:
+            directory_of_frequency_channels = self.process_data_thread.get_frequency_data()
+            sorted_keys = sorted(directory_of_frequency_channels.keys())
 
-        for position, key in enumerate(sorted_keys):
-            if self.plot_channel_key_booleans[position]:
-                self.frequency_lines[position].setData(x = directory_of_frequency_channels[key]['x'], y = directory_of_frequency_channels[key]['y'])
-            else:
-                self.frequency_lines[position].setData([],[])
+            for position, key in enumerate(sorted_keys):
+                if self.plot_channel_key_booleans[position]:
+                    self.frequency_lines[position].setData(x = directory_of_frequency_channels[key]['x'],
+                                                           y = directory_of_frequency_channels[key]['y'])
+                else:
+                    self.frequency_lines[position].setData([],[])
+        except Exception as e:
+            print (e)
 
     def plot_resistance_data(self):
-        time_duration_list, resistance_list = self.process_data_thread.get_resistance_data()
-
-        self.resistance_line.setData(x = time_duration_list, y = resistance_list)
+        try:
+            time_duration_list, resistance_list = self.process_data_thread.get_resistance_data()
+            self.resistance_line.setData(x = time_duration_list, y = resistance_list)
+        except Exception as e:
+            print (e)
 
     def plot_temperature_data(self):
-        self.temperature_plot_graph.setLabel ('left', 'Temperature (C)')
-        self.temperature_plot_graph.setLabel ('bottom', 'Time (S)')
-        if not self.process_data_thread.temperature_queue.empty():
-            self.temperature_line.setData(*self.process_data_thread.get_temperature_data())
-
+        try:
+            self.temperature_plot_graph.setLabel ('left', 'Temperature (C)')
+            self.temperature_plot_graph.setLabel ('bottom', 'Time (S)')
+            if not self.process_data_thread.temperature_queue.empty():
+                self.temperature_line.setData(*self.process_data_thread.get_temperature_data())
+        except Exception as e:
+            print (e)
 
     def plot_pressure_data(self):
-        self.pressure_plot_graph.setLabel ('left', 'Pa')
-        self.pressure_plot_graph.setLabel ('bottom', 'Time (S)')
+        try:
+            self.pressure_plot_graph.setLabel ('left', 'Pa')
+            self.pressure_plot_graph.setLabel ('bottom', 'Time (S)')
 
-        if not self.process_data_thread.pressure_queue.empty():
-            self.pressure_line.setData(*self.process_data_thread.get_pressure_data())
+            if not self.process_data_thread.pressure_queue.empty():
+                self.pressure_line.setData(*self.process_data_thread.get_pressure_data())
+
+        except Exception as e:
+            print (e)
 
     def plot_humidity_data(self):
-        self.humidity_plot_graph.setLabel ('left', '% Rh')
-        self.humidity_plot_graph.setLabel ('bottom', 'Time (S)')
+        try:
+            self.humidity_plot_graph.setLabel ('left', '% Rh')
+            self.humidity_plot_graph.setLabel ('bottom', 'Time (S)')
 
 
-        if not self.process_data_thread.humidity_queue.empty():
-            self.humidity_line.setData(*self.process_data_thread.get_humidity_data())
+            if not self.process_data_thread.humidity_queue.empty():
+                self.humidity_line.setData(*self.process_data_thread.get_humidity_data())
+        except Exception as e:
+            print (e)
 
     # When the region changes then this function will change the plots accordingly
     def update_plots_using_region(self):
-        self.frequency_resistance_plot_graph.setXRange  (*self.linear_region.getRegion(), padding = 0)
+        self.frequency_plot_graph.setXRange  (*self.linear_region.getRegion(), padding = 0)
+        self.resistance_graph.setXRange  (*self.linear_region.getRegion(), padding = 0)
         self.temperature_plot_graph.setXRange(*self.linear_region.getRegion(), padding = 0)
         self.pressure_plot_graph.setXRange   (*self.linear_region.getRegion(), padding = 0)
         self.humidity_plot_graph.setXRange   (*self.linear_region.getRegion(), padding = 0)
 
     def update_frequency_region(self):
-        self.linear_region.setRegion(self.frequency_resistance_plot_graph.getViewBox().viewRange()[0])
+        self.linear_region.setRegion(self.frequency_plot_graph.getViewBox().viewRange()[0])
+
+    def update_resistance_region(self):
+        self.linear_region.setRegion(self.resistance_graph.getViewBox().viewRange()[0])
 
     def update_temperature_region(self):
         self.linear_region.setRegion(self.temperature_plot_graph.getViewBox().viewRange()[0])
@@ -462,7 +458,8 @@ class Graph_Window(GraphicsLayoutWidget):
         self.linear_region.setRegion(self.humidity_plot_graph.getViewBox().viewRange()[0])
 
     def show_graphs(self):
-        self.frequency_resistance_plot_graph.show()
+        self.frequency_plot_graph.show()
+        self.resistance_graph.show()
         self.temperature_plot_graph.show()
         self.pressure_plot_graph.show()
         self.humidity_plot_graph.show()

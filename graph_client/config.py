@@ -1,6 +1,7 @@
 import os
 LOCAL_DIRECTORY_OF_FILE = os.path.dirname(os.path.realpath(__file__))
 LOCAL_DIRECTORY_OF_SENSOR_DATA = LOCAL_DIRECTORY_OF_FILE + '/sensor_data/'
+LOCAL_DIRECTORY_OF_SENSOR_DATA = r'C:\Users\Tabby\Documents\GitHub\Bluetooth-Low-Energy-Gas-Sensor-Manager\sensor_client' + '/sensor_data/'
 
 if LOCAL_DIRECTORY_OF_SENSOR_DATA[-1:] != '/' and LOCAL_DIRECTORY_OF_SENSOR_DATA[-1:] != '\\':
     LOCAL_DIRECTORY_OF_SENSOR_DATA = LOCAL_DIRECTORY_OF_SENSOR_DATA + '/'

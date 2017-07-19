@@ -11,12 +11,15 @@ from queue import Queue
 from graph_widget import *
 from config import *
 
+import json
+
 
 class Server_Handler(QThread):
-    def __init__(self, passed_parent_widget):
+    def __init__(self, passed_parent_widget, attempt_connection_button):
         QThread.__init__(self)
 
         self.parent_widget = passed_parent_widget
+        self.attempt_connection_button = attempt_connection_button
 
         self.current_data = []
         self.is_running = True
@@ -24,7 +27,7 @@ class Server_Handler(QThread):
         self.cnopts = pysftp.CnOpts()
         self.cnopts.hostkeys = None
 
-        self.attempt_connection = True
+        self.attempt_connection = False
 
         if self.ping_test():
             self.get_sensor_data_from_server()
@@ -51,11 +54,11 @@ class Server_Handler(QThread):
         finally:
             ping_test_socket.close()
 
-    def get_file_from_server(self, passed_file_path_frequency_resistance):
+    def get_file_from_server(self, passed_file_path_json):
         if not self.ping_test():
             return
 
-        passed_file_path_frequency_resistance = passed_file_path_frequency_resistance.replace('\\','/')
+        passed_file_path_json = passed_file_path_json.replace('\\','/')
         position_to_cut = len(LOCAL_DIRECTORY_OF_SENSOR_DATA)
 
 
@@ -65,12 +68,12 @@ class Server_Handler(QThread):
                                cnopts=self.cnopts,
                                port = RASPBERRY_PI_PORT) as sftp:
 
-            remote_path = RASPBERRY_PI_SENSOR_DATA_FOLDER + passed_file_path_frequency_resistance[position_to_cut:]
+            remote_path = RASPBERRY_PI_SENSOR_DATA_FOLDER + passed_file_path_json[position_to_cut:]
 
             global DOWNLOADING_FILES
             if sftp.exists(remote_path) and not DOWNLOADING_FILES:
                 DOWNLOADING_FILES = True
-                sftp.get(remote_path, LOCAL_DIRECTORY_OF_SENSOR_DATA + passed_file_path_frequency_resistance[position_to_cut:], preserve_mtime=True)
+                sftp.get(remote_path, LOCAL_DIRECTORY_OF_SENSOR_DATA + passed_file_path_json[position_to_cut:], preserve_mtime=True)
                 DOWNLOADING_FILES = False
 
     def get_sensor_data_from_server(self):
@@ -94,8 +97,11 @@ class Server_Handler(QThread):
         while (self.is_running):
             try:
                 if self.attempt_connection:
-                    self.get_file_from_server(str(self.parent_widget.file_path_frequency_resistance))
-                    self.get_file_from_server(str(self.parent_widget.file_path_environment))
+                    self.attempt_connection_button.setStyleSheet("background-color:rgb(0,255,0)")
+                    self.get_file_from_server(str(self.parent_widget.file_path_json))
+                    #self.get_file_from_server(str(self.parent_widget.file_path_environment))
+                else:
+                    self.attempt_connection_button.setStyleSheet("background-color:rgb(255,0,0)")
 
             except Exception as e:
                 print(e)
@@ -142,18 +148,22 @@ class Data_Processing_Stream_Thread(QThread):
         time_to_process = time()
 
         try:
-            if self.parent_widget.file_path_frequency_resistance is None:
+            if self.parent_widget.file_path_json is None:
                 pass
-            elif self.parent_widget.file_path_frequency_resistance[-len('Frequency.csv'):] == 'Frequency.csv':
-                self.process_frequency_data()
 
-            elif self.parent_widget.file_path_frequency_resistance[-len('Resistance.csv'):] == 'Resistance.csv':
-                self.process_resistance_data()
+            if self.parent_widget.file_path_json[-len('csv'):]:
+                if DOWNLOADING_FILES:
+                    return
 
-            if self.parent_widget.file_path_environment is None:
-                pass
-            elif self.parent_widget.file_path_environment[-len('Environment.csv'):] == 'Environment.csv':
-                self.process_environment_data()
+                with open(self.parent_widget.file_path_json, 'r') as current_file:
+                    json_data = json.load(current_file)
+
+                self.process_frequency_data(json_data)
+                self.process_resistance_data(json_data)
+                self.process_temperature_data(json_data)
+                self.process_pressure_data(json_data)
+                self.process_humidity_data(json_data)
+
 
         except Exception as e:
             print ('ERROR: Processing Data Thread:', e)
@@ -162,129 +172,112 @@ class Data_Processing_Stream_Thread(QThread):
             print ('Process Function took: %0.4f ms' % float(time() - time_to_process))
             sleep(0.1)
 
-    def process_environment_data(self):
+    def process_temperature_data(self,json_data):
 
         try:
-            if DOWNLOADING_FILES:
-                return
-
-            with open(self.parent_widget.file_path_environment, 'r') as current_file:
-                data = current_file.read().split('\n')
-
-            temperature_time_duration_list = []
+            time_duration_list = []
             temperature_list = []
-
-            pressure_time_duration_list = []
-            pressure_list = []
-
-            humidity_time_duration_list = []
-            humidity_list = []
-
-            for line in data:
-                line = line.split(',')
-
-                if '' in line:
-                    line.remove('')
-                if len(line) == 0:
-                    continue
-
-                temperature_time_duration_list.append(float(line[0]))
-                temperature_list.append(float(line[1]))
-                pressure_time_duration_list.append(float(line[2]))
-                pressure_list.append(float(line[3]))
-                humidity_time_duration_list.append(float(line[4]))
-                humidity_list.append(float(line[5]))
+            for dictionary in json_data:
+                if not dictionary['temperature']['value'] is None:
+                    time_duration_list.append(dictionary['temperature']['time'])
+                    temperature_list.append(dictionary['temperature']['value'])
 
 
-            self.temperature_queue.put((temperature_time_duration_list,temperature_list))
-            self.pressure_queue.put((pressure_time_duration_list, pressure_list))
-            self.humidity_queue.put((humidity_time_duration_list, humidity_list))
+
+            if not self.humidity_queue.full():
+                self.temperature_queue.put((time_duration_list, temperature_list))
+            else:
+                self.humidity_queue.get()
+                self.temperature_queue.put((time_duration_list, temperature_list))
+
+
         except Exception as e:
-            print('ERROR: processing environment:', e)
+            print('ERROR: processing temperature:', e)
 
-    def process_frequency_data(self):
+    def process_pressure_data(self,json_data):
+
+        try:
+            time_duration_list = []
+            pressure_list = []
+            for dictionary in json_data:
+                if not dictionary['pressure']['value'] is None:
+                    time_duration_list.append(dictionary['pressure']['time'])
+                    pressure_list.append(dictionary['pressure']['value'])
+
+
+            if not self.humidity_queue.full():
+                self.pressure_queue.put((time_duration_list, pressure_list))
+            else:
+                self.humidity_queue.get()
+                self.pressure_queue.put((time_duration_list, pressure_list))
+
+        except Exception as e:
+            print('ERROR: processing pressure:', e)
+
+
+    def process_humidity_data(self,json_data):
+
+        try:
+            time_duration_list = []
+            humidity_list = []
+            for dictionary in json_data:
+                if not dictionary['humidity']['value'] is None:
+                    time_duration_list.append(dictionary['humidity']['time'])
+                    humidity_list.append(dictionary['humidity']['value'])
+
+
+            if not self.humidity_queue.full():
+                self.humidity_queue.put((time_duration_list, humidity_list))
+            else:
+                self.humidity_queue.get()
+                self.humidity_queue.put((time_duration_list, humidity_list))
+
+
+        except Exception as e:
+            print('ERROR: processing humidity:', e)
+
+    def process_frequency_data(self, json_data):
         # Reads data from latest file and splits into a list of lines
 
-        if self.frequency_queue.full():
-            return
         try:
-            # Don't read when downloading
-            # NOTE: Instead of using a while loop to wait until its done downloading
-            # we can just return and let the next loop around handle it.
-            # This is done since if we use a while loop it can cause preformance drops
-            if DOWNLOADING_FILES:
-                return
-
-            with open(self.parent_widget.file_path_frequency_resistance, 'r') as current_file:
-                data = current_file.read().split('\n')
-
             for key in self.sorted_keys:
                 self.directory_of_frequency_channels[key]['x'].clear()
                 self.directory_of_frequency_channels[key]['y'].clear()
 
-            for line in data:
 
-                line = line.split(',')
+            for dictionary in json_data:
+                for position, key in enumerate(self.sorted_keys):
+                    if not dictionary['frequency']['value'][str(position)] is None:
 
-                if '' in line:
-                    line.remove('')
-                if len(line) == 0:
-                    continue
-
-                #for key in self.sorted_keys:
-                #    for count in range(0, len(line), 3):
-                key_position = 0
-                for count in range(0, len(line), 3):
-                        key = self.sorted_keys[key_position]
-                        self.directory_of_frequency_channels[key]['x'].append(float(line[count+1]))
-                        self.directory_of_frequency_channels[key]['y'].append(float(line[count+2]))
-                        key_position += 1
+                        self.directory_of_frequency_channels[key]['x'].append(dictionary['frequency']['time'])
+                        self.directory_of_frequency_channels[key]['y'].append(float(dictionary['frequency']['value'][str(position)]))
 
             if not self.frequency_queue.full():
                 self.frequency_queue.put(dict(self.directory_of_frequency_channels))
             else:
                 self.frequency_queue.get()
                 self.frequency_queue.put(dict(self.directory_of_frequency_channels))
+
         except Exception as e:
             print ('ERROR: process_frequency_data:', e)
 
-    def process_resistance_data(self):
+    def process_resistance_data(self, json_data):
         try:
-
-            if self.resistance_queue.full():
-                return
-
-            # Don't read while downloading
-            # NOTE: Instead of using a while loop to wait until its done downloading
-            # we can just return and let the next loop around handle it.
-            # This is done since if we use a while loop it can cause preformance drops
-            if DOWNLOADING_FILES:
-                return
-
-            with open(self.parent_widget.file_path_frequency_resistance, 'r') as current_file:
-                file_lines = current_file.read().split('\n')
 
             time_duration_list = []
             resistance_list = []
 
-            for line in file_lines:
-                if line.find(',') == -1 :
-                    continue
-                line = line.split(',')
-                if len(line) < 4:
-                    continue
+            for dictionary in json_data:
+                if not dictionary['resistance']['value'] is None:
+                    time_duration_list.append(dictionary['resistance']['time'])
+                    resistance_list.append(dictionary['resistance']['value'])
 
-                if '\n' in line:
-                    line.remove('\n')
-                if '' in line:
-                    line.remove('')
-                if ' ' in line:
-                    line.remove(' ')
+            if not self.resistance_queue.full():
+                self.resistance_queue.put ( (time_duration_list, resistance_list) )
+            else:
+                self.resistance_queue.get()
+                self.resistance_queue.put ( (time_duration_list, resistance_list) )
 
-                time_duration_list.append (float(line[0]))
-                resistance_list.append (float(line[3]))
-
-            self.resistance_queue.put ( (time_duration_list, resistance_list) )
         except Exception as e:
             print ('Error: process_resistance_data:', e)
 
