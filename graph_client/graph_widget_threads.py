@@ -48,7 +48,7 @@ class Server_Handler(QThread):
             ping_test_socket.connect((RASPBERRY_PI_HOST, RASPBERRY_PI_PORT))
             return True
         except socket.error as e:
-            print (e)
+            print(e)
             return False
 
         finally:
@@ -58,22 +58,22 @@ class Server_Handler(QThread):
         if not self.ping_test():
             return
 
-        passed_file_path_json = passed_file_path_json.replace('\\','/')
+        passed_file_path_json = passed_file_path_json.replace('\\', '/')
         position_to_cut = len(LOCAL_DIRECTORY_OF_SENSOR_DATA)
 
-
-        with pysftp.Connection(host = RASPBERRY_PI_HOST,
-                               username = RASPBERRY_PI_USERNAME,
+        with pysftp.Connection(host=RASPBERRY_PI_HOST,
+                               username=RASPBERRY_PI_USERNAME,
                                password=RASPBERRY_PI_PASSWORD,
                                cnopts=self.cnopts,
-                               port = RASPBERRY_PI_PORT) as sftp:
+                               port=RASPBERRY_PI_PORT) as sftp:
 
             remote_path = RASPBERRY_PI_SENSOR_DATA_FOLDER + passed_file_path_json[position_to_cut:]
 
             global DOWNLOADING_FILES
             if sftp.exists(remote_path) and not DOWNLOADING_FILES:
                 DOWNLOADING_FILES = True
-                sftp.get(remote_path, LOCAL_DIRECTORY_OF_SENSOR_DATA + passed_file_path_json[position_to_cut:], preserve_mtime=True)
+                sftp.get(remote_path, LOCAL_DIRECTORY_OF_SENSOR_DATA + passed_file_path_json[position_to_cut:],
+                         preserve_mtime=True)
                 DOWNLOADING_FILES = False
 
     def get_sensor_data_from_server(self):
@@ -83,11 +83,11 @@ class Server_Handler(QThread):
 
         cnopts = pysftp.CnOpts()
         cnopts.hostkeys = None
-        with pysftp.Connection(host = RASPBERRY_PI_HOST,
-                               username = RASPBERRY_PI_USERNAME,
-                               password = RASPBERRY_PI_PASSWORD,
-                               cnopts = self.cnopts,
-                               port = RASPBERRY_PI_PORT) as stfp:
+        with pysftp.Connection(host=RASPBERRY_PI_HOST,
+                               username=RASPBERRY_PI_USERNAME,
+                               password=RASPBERRY_PI_PASSWORD,
+                               cnopts=self.cnopts,
+                               port=RASPBERRY_PI_PORT) as stfp:
             global DOWNLOADING_FILES
             DOWNLOADING_FILES = True
             stfp.get_d(RASPBERRY_PI_SENSOR_DATA_FOLDER, LOCAL_DIRECTORY_OF_SENSOR_DATA, preserve_mtime=True)
@@ -99,7 +99,7 @@ class Server_Handler(QThread):
                 if self.attempt_connection:
                     self.attempt_connection_button.setStyleSheet("background-color:rgb(0,255,0)")
                     self.get_file_from_server(str(self.parent_widget.file_path_json))
-                    #self.get_file_from_server(str(self.parent_widget.file_path_environment))
+                    # self.get_file_from_server(str(self.parent_widget.file_path_environment))
                 else:
                     self.attempt_connection_button.setStyleSheet("background-color:rgb(255,0,0)")
 
@@ -149,7 +149,7 @@ class Data_Processing_Stream_Thread(QThread):
 
         try:
             if self.parent_widget.file_path_json is None:
-                pass
+                return
 
             if self.parent_widget.file_path_json[-len('csv'):]:
                 if DOWNLOADING_FILES:
@@ -166,13 +166,13 @@ class Data_Processing_Stream_Thread(QThread):
 
 
         except Exception as e:
-            print ('ERROR: Processing Data Thread:', e)
+            print('ERROR: Processing Data Thread:', e)
 
         finally:
-            print ('Process Function took: %0.4f ms' % float(time() - time_to_process))
+            print('Process Function took: %0.4f ms' % float(time() - time_to_process))
             sleep(0.1)
 
-    def process_temperature_data(self,json_data):
+    def process_temperature_data(self, json_data):
 
         try:
             time_duration_list = []
@@ -181,8 +181,6 @@ class Data_Processing_Stream_Thread(QThread):
                 if not dictionary['temperature']['value'] is None:
                     time_duration_list.append(dictionary['temperature']['time'])
                     temperature_list.append(dictionary['temperature']['value'])
-
-
 
             if not self.humidity_queue.full():
                 self.temperature_queue.put((time_duration_list, temperature_list))
@@ -194,7 +192,7 @@ class Data_Processing_Stream_Thread(QThread):
         except Exception as e:
             print('ERROR: processing temperature:', e)
 
-    def process_pressure_data(self,json_data):
+    def process_pressure_data(self, json_data):
 
         try:
             time_duration_list = []
@@ -203,7 +201,6 @@ class Data_Processing_Stream_Thread(QThread):
                 if not dictionary['pressure']['value'] is None:
                     time_duration_list.append(dictionary['pressure']['time'])
                     pressure_list.append(dictionary['pressure']['value'])
-
 
             if not self.humidity_queue.full():
                 self.pressure_queue.put((time_duration_list, pressure_list))
@@ -214,8 +211,7 @@ class Data_Processing_Stream_Thread(QThread):
         except Exception as e:
             print('ERROR: processing pressure:', e)
 
-
-    def process_humidity_data(self,json_data):
+    def process_humidity_data(self, json_data):
 
         try:
             time_duration_list = []
@@ -224,7 +220,6 @@ class Data_Processing_Stream_Thread(QThread):
                 if not dictionary['humidity']['value'] is None:
                     time_duration_list.append(dictionary['humidity']['time'])
                     humidity_list.append(dictionary['humidity']['value'])
-
 
             if not self.humidity_queue.full():
                 self.humidity_queue.put((time_duration_list, humidity_list))
@@ -244,13 +239,12 @@ class Data_Processing_Stream_Thread(QThread):
                 self.directory_of_frequency_channels[key]['x'].clear()
                 self.directory_of_frequency_channels[key]['y'].clear()
 
-
             for dictionary in json_data:
                 for position, key in enumerate(self.sorted_keys):
                     if not dictionary['frequency']['value'][str(position)] is None:
-
                         self.directory_of_frequency_channels[key]['x'].append(dictionary['frequency']['time'])
-                        self.directory_of_frequency_channels[key]['y'].append(float(dictionary['frequency']['value'][str(position)]))
+                        self.directory_of_frequency_channels[key]['y'].append(
+                            float(dictionary['frequency']['value'][str(position)]))
 
             if not self.frequency_queue.full():
                 self.frequency_queue.put(dict(self.directory_of_frequency_channels))
@@ -259,7 +253,7 @@ class Data_Processing_Stream_Thread(QThread):
                 self.frequency_queue.put(dict(self.directory_of_frequency_channels))
 
         except Exception as e:
-            print ('ERROR: process_frequency_data:', e)
+            print('ERROR: process_frequency_data:', e)
 
     def process_resistance_data(self, json_data):
         try:
@@ -273,13 +267,13 @@ class Data_Processing_Stream_Thread(QThread):
                     resistance_list.append(dictionary['resistance']['value'])
 
             if not self.resistance_queue.full():
-                self.resistance_queue.put ( (time_duration_list, resistance_list) )
+                self.resistance_queue.put((time_duration_list, resistance_list))
             else:
                 self.resistance_queue.get()
-                self.resistance_queue.put ( (time_duration_list, resistance_list) )
+                self.resistance_queue.put((time_duration_list, resistance_list))
 
         except Exception as e:
-            print ('Error: process_resistance_data:', e)
+            print('Error: process_resistance_data:', e)
 
     def get_frequency_data(self):
         return self.frequency_queue.get()

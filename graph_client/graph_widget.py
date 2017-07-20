@@ -18,7 +18,8 @@ from time import time
 # Developer Modules
 from graph_widget_threads import *
 
-def SELECT_LATEST_FILE_JSON(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
+
+def SELECT_LATEST_FILE_JSON(directory=LOCAL_DIRECTORY_OF_SENSOR_DATA):
     latest_time = None
     latest_path = None
     first_loop = True
@@ -27,7 +28,7 @@ def SELECT_LATEST_FILE_JSON(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
         if os.path.isfile(file_path_json):
             current_time = os.stat(file_path_json)
             if not first_loop and int(current_time.st_mtime) > int(latest_time.st_mtime) and \
-                file_path_json[-len('.json'):] == '.json':
+                            file_path_json[-len('.json'):] == '.json':
                 latest_time = os.stat(file_path_json)
                 latest_path = file_path_json
             elif first_loop:
@@ -36,11 +37,12 @@ def SELECT_LATEST_FILE_JSON(directory = LOCAL_DIRECTORY_OF_SENSOR_DATA):
                 first_loop = False
     return latest_path
 
+
 class Graph_Window(GraphicsLayoutWidget):
     def __init__(self):
         super().__init__()
 
-        self.resize (1920, 1080)
+        self.resize(1920, 1080)
 
         button_width = 19
 
@@ -64,20 +66,19 @@ class Graph_Window(GraphicsLayoutWidget):
         ########################################################################
         # Plot Channel Plotting Booleans
         ########################################################################
-        self.plot_channel_one   = True
-        self.plot_channel_two   = True
+        self.plot_channel_one = True
+        self.plot_channel_two = True
         self.plot_channel_three = True
-        self.plot_channel_four  = True
-        self.plot_channel_five  = True
-        self.plot_channel_six   = True
+        self.plot_channel_four = True
+        self.plot_channel_five = True
+        self.plot_channel_six = True
         self.plot_channel_seven = True
         self.plot_channel_eight = True
 
         # The position of this list corispond to the position of the sorted directory_of_frequency_channels keys
         self.plot_channel_key_booleans = []
-        for count in range( len(DICTIONARY_OF_CHANNEL_KEYS.keys()) ):
+        for count in range(len(DICTIONARY_OF_CHANNEL_KEYS.keys())):
             self.plot_channel_key_booleans.append(True)
-
 
         ########################################################################
         # Graph Channel Buttons
@@ -91,14 +92,12 @@ class Graph_Window(GraphicsLayoutWidget):
         self.graph_channel_one_button.move(channel_button_x_location_start, 0)
         self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
 
-
         channel_button_x_location_start += length_of_button
         self.graph_channel_two_button = QPushButton('Graph Channel 1', self)
         self.graph_channel_two_button.resize(length_of_button, button_width)
         self.graph_channel_two_button.clicked.connect(self.switch_frequency_plot_channel_two)
         self.graph_channel_two_button.move(channel_button_x_location_start, 0)
         self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
-
 
         channel_button_x_location_start += length_of_button
         self.graph_channel_three_button = QPushButton('Graph Channel 2', self)
@@ -107,14 +106,12 @@ class Graph_Window(GraphicsLayoutWidget):
         self.graph_channel_three_button.move(channel_button_x_location_start, 0)
         self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
 
-
         channel_button_x_location_start += length_of_button
         self.graph_channel_four_button = QPushButton('Graph Channel 3', self)
         self.graph_channel_four_button.resize(length_of_button, button_width)
         self.graph_channel_four_button.clicked.connect(self.switch_frequency_plot_channel_four)
         self.graph_channel_four_button.move(channel_button_x_location_start, 0)
         self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
-
 
         channel_button_x_location_start += length_of_button
         self.graph_channel_five_button = QPushButton('Graph Channel 4', self)
@@ -123,7 +120,6 @@ class Graph_Window(GraphicsLayoutWidget):
         self.graph_channel_five_button.move(channel_button_x_location_start, 0)
         self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
 
-
         channel_button_x_location_start += length_of_button
         self.graph_channel_six_button = QPushButton('Graph Channel 5', self)
         self.graph_channel_six_button.resize(length_of_button, button_width)
@@ -131,14 +127,12 @@ class Graph_Window(GraphicsLayoutWidget):
         self.graph_channel_six_button.move(channel_button_x_location_start, 0)
         self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
 
-
         channel_button_x_location_start += length_of_button
         self.graph_channel_seven_button = QPushButton('Graph Channel 6', self)
         self.graph_channel_seven_button.resize(length_of_button, button_width)
         self.graph_channel_seven_button.clicked.connect(self.switch_frequency_plot_channel_seven)
         self.graph_channel_seven_button.move(channel_button_x_location_start, 0)
         self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
-
 
         channel_button_x_location_start += length_of_button
         self.graph_channel_eight_button = QPushButton('Graph Channel 7', self)
@@ -157,78 +151,82 @@ class Graph_Window(GraphicsLayoutWidget):
         ########################################################################
         # Init of linear region that can control all graphs at once
         ########################################################################
-        self.linear_region = pg.LinearRegionItem([0,3000])
+        self.linear_region = pg.LinearRegionItem([0, 3000])
         self.linear_region.setZValue(-10)
 
         ########################################################################
         # Init of all plot widgets
         ########################################################################
 
-        self.frequency_plot_graph   = self.addPlot(title = 'Frequency')
+        self.frequency_plot_graph = self.addPlot(title='Frequency')
         self.frequency_resistance_legend = self.frequency_plot_graph.addLegend()
 
         self.nextRow()
-        self.resistance_graph = self.addPlot(title = 'Resistance')
+        self.resistance_graph = self.addPlot(title='Resistance')
 
         self.nextRow()
-        self.temperature_plot_graph = self.addPlot(title = 'Temperature')
+        self.temperature_plot_graph = self.addPlot(title='Temperature')
         self.nextRow()
-        self.pressure_plot_graph    = self.addPlot(title = 'Pressure')
+        self.pressure_plot_graph = self.addPlot(title='Pressure')
         self.nextRow()
-        self.humidity_plot_graph    = self.addPlot(title = 'Humidity')
+        self.humidity_plot_graph = self.addPlot(title='Humidity')
         self.nextRow()
-        self.overview_graph    = self.addPlot(title = 'Overview')
+        self.overview_graph = self.addPlot(title='Overview')
         self.overview_graph.addItem(self.linear_region)
 
-        self.frequency_plot_graph.showGrid  (x = True, y = True)
-        self.resistance_graph.showGrid(x = True, y = True)
-        self.temperature_plot_graph.showGrid(x = True, y = True)
-        self.pressure_plot_graph.showGrid   (x = True, y = True)
-        self.humidity_plot_graph.showGrid   (x = True, y = True)
-        self.overview_graph.showGrid   (x = True, y = True)
+        self.frequency_plot_graph.showGrid(x=True, y=True)
+        self.resistance_graph.showGrid(x=True, y=True)
+        self.temperature_plot_graph.showGrid(x=True, y=True)
+        self.pressure_plot_graph.showGrid(x=True, y=True)
+        self.humidity_plot_graph.showGrid(x=True, y=True)
+        self.overview_graph.showGrid(x=True, y=True)
 
-        self.frequency_plot_graph.sigXRangeChanged.connect  (self.update_frequency_region)
-        self.resistance_graph.sigXRangeChanged.connect  (self.update_resistance_region)
+        self.frequency_plot_graph.sigXRangeChanged.connect(self.update_frequency_region)
+        self.resistance_graph.sigXRangeChanged.connect(self.update_resistance_region)
         self.temperature_plot_graph.sigXRangeChanged.connect(self.update_temperature_region)
-        self.pressure_plot_graph.sigXRangeChanged.connect   (self.update_pressure_region)
-        self.humidity_plot_graph.sigXRangeChanged.connect   (self.update_humidity_region)
+        self.pressure_plot_graph.sigXRangeChanged.connect(self.update_pressure_region)
+        self.humidity_plot_graph.sigXRangeChanged.connect(self.update_humidity_region)
 
         self.frequency_lines = []
 
         for position in range(0, len(DICTIONARY_OF_CHANNEL_KEYS.keys())):
-
-            self.frequency_lines.append( self.frequency_plot_graph.plot(x=[],
-                                             y=[],
-                                             pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[position]),
-                                             symbol = 'o',
-                                             symbolBrush = pg.mkBrush(LINE_COLORS[position]),
-                                             name = 'Channel %d' % position))
+            self.frequency_lines.append(self.frequency_plot_graph.plot(x=[],
+                                                                       y=[],
+                                                                       pen=pg.mkPen(cosmetic=True, width=LINE_THICKNESS,
+                                                                                    color=LINE_COLORS[position]),
+                                                                       symbol='o',
+                                                                       symbolBrush=pg.mkBrush(LINE_COLORS[position]),
+                                                                       name='Channel %d' % position))
 
         self.resistance_line = self.resistance_graph.plot(x=[],
-                                         y=[],
-                                         pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[0]),
-                                         symbol = 'o',
-                                         symbolBrush = pg.mkBrush(LINE_COLORS[0]),
-                                         name = 'Resistance')
+                                                          y=[],
+                                                          pen=pg.mkPen(cosmetic=True, width=LINE_THICKNESS,
+                                                                       color=LINE_COLORS[0]),
+                                                          symbol='o',
+                                                          symbolBrush=pg.mkBrush(LINE_COLORS[0]),
+                                                          name='Resistance')
 
         self.temperature_line = self.temperature_plot_graph.plot(x=[],
-                                         y=[],
-                                         pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[1]),
-                                         symbol = 'o',
-                                         symbolBrush = pg.mkBrush(LINE_COLORS[1]),
-                                         name = 'Temperature')
+                                                                 y=[],
+                                                                 pen=pg.mkPen(cosmetic=True, width=LINE_THICKNESS,
+                                                                              color=LINE_COLORS[1]),
+                                                                 symbol='o',
+                                                                 symbolBrush=pg.mkBrush(LINE_COLORS[1]),
+                                                                 name='Temperature')
         self.pressure_line = self.pressure_plot_graph.plot(x=[],
-                                         y=[],
-                                         pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[2]),
-                                         symbol = 'o',
-                                         symbolBrush = pg.mkBrush(LINE_COLORS[2]),
-                                         name = 'Pressure')
+                                                           y=[],
+                                                           pen=pg.mkPen(cosmetic=True, width=LINE_THICKNESS,
+                                                                        color=LINE_COLORS[2]),
+                                                           symbol='o',
+                                                           symbolBrush=pg.mkBrush(LINE_COLORS[2]),
+                                                           name='Pressure')
         self.humidity_line = self.humidity_plot_graph.plot(x=[],
-                                         y=[],
-                                         pen = pg.mkPen(cosmetic = True, width = LINE_THICKNESS, color = LINE_COLORS[3]),
-                                         symbol = 'o',
-                                         symbolBrush = pg.mkBrush(LINE_COLORS[3]),
-                                         name = 'Humidity')
+                                                           y=[],
+                                                           pen=pg.mkPen(cosmetic=True, width=LINE_THICKNESS,
+                                                                        color=LINE_COLORS[3]),
+                                                           symbol='o',
+                                                           symbolBrush=pg.mkBrush(LINE_COLORS[3]),
+                                                           name='Humidity')
 
         self.linear_region.sigRegionChanged.connect(self.update_plots_using_region)
 
@@ -275,73 +273,70 @@ class Graph_Window(GraphicsLayoutWidget):
             self.clear_all_plots()
             self.file_path_json = new_file_path_json
 
-
-
     def switch_frequency_plot_channel_one(self):
         if self.plot_channel_key_booleans[0]:
             self.plot_channel_key_booleans[0] = False
-            self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+            self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
 
         else:
-            self.plot_channel_key_booleans[0]  = True
+            self.plot_channel_key_booleans[0] = True
             self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
-
 
     def switch_frequency_plot_channel_two(self):
         if self.plot_channel_key_booleans[1]:
             self.plot_channel_key_booleans[1] = False
-            self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+            self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
-            self.plot_channel_key_booleans[1]  = True
+            self.plot_channel_key_booleans[1] = True
             self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
 
     def switch_frequency_plot_channel_three(self):
         if self.plot_channel_key_booleans[2]:
             self.plot_channel_key_booleans[2] = False
-            self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+            self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
 
         else:
-            self.plot_channel_key_booleans[2]  = True
+            self.plot_channel_key_booleans[2] = True
             self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
 
     def switch_frequency_plot_channel_four(self):
         if self.plot_channel_key_booleans[3]:
             self.plot_channel_key_booleans[3] = False
-            self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+            self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
-            self.plot_channel_key_booleans[3]  = True
+            self.plot_channel_key_booleans[3] = True
             self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
 
     def switch_frequency_plot_channel_five(self):
         if self.plot_channel_key_booleans[4]:
             self.plot_channel_key_booleans[4] = False
-            self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+            self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
-            self.plot_channel_key_booleans[4]  = True
+            self.plot_channel_key_booleans[4] = True
             self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
 
     def switch_frequency_plot_channel_six(self):
         if self.plot_channel_key_booleans[5]:
             self.plot_channel_key_booleans[5] = False
-            self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+            self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
-            self.plot_channel_key_booleans[5]  = True
+            self.plot_channel_key_booleans[5] = True
             self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
 
     def switch_frequency_plot_channel_seven(self):
         if self.plot_channel_key_booleans[6]:
             self.plot_channel_key_booleans[6] = False
-            self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+            self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
-            self.plot_channel_key_booleans[6]  = True
+            self.plot_channel_key_booleans[6] = True
             self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
 
     def switch_frequency_plot_channel_eight(self):
         if self.plot_channel_key_booleans[7]:
             self.plot_channel_key_booleans[7] = False
-            self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255,255,255))
+            self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
-            self.plot_channel_key_booleans[7]  = True
+            self.plot_channel_key_booleans[7] = True
             self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
 
     def clear_all_plots(self):
@@ -366,81 +361,95 @@ class Graph_Window(GraphicsLayoutWidget):
 
             if self.file_path_json[-len('Frequency.csv'):] == 'Frequency.csv':
                 if not self.process_data_thread.frequency_queue.empty():
-                    self.frequency_plot_graph.setTitle ('Resonant Frequency')
-                    self.frequency_plot_graph.setLabel ('left', 'Frequency (MHz)')
-                    self.frequency_plot_graph.setLabel ('bottom', 'Time (s)')
+                    self.frequency_plot_graph.setTitle('Resonant Frequency')
+                    self.frequency_plot_graph.setLabel('left', 'Frequency (MHz)')
+                    self.frequency_plot_graph.setLabel('bottom', 'Time (s)')
                     self.plot_frequency_data()
 
             elif self.file_path_json[-len('Resistance.csv'):] == 'Resistance.csv':
                 if not self.process_data_thread.resistance_queue.empty():
-                    self.frequency_plot_graph.setTitle ('Resistance')
-                    self.frequency_plot_graph.setLabel ('left', 'Resistance (Ohms)')
-                    self.frequency_plot_graph.setLabel ('bottom', 'Time (s)')
+                    self.frequency_plot_graph.setTitle('Resistance')
+                    self.frequency_plot_graph.setLabel('left', 'Resistance (Ohms)')
+                    self.frequency_plot_graph.setLabel('bottom', 'Time (s)')
                     self.plot_resistance_data()
 
         except Exception as e:
-            print ('ERROR: Plot frequency / resistance data:', e)
+            print('ERROR: Plot frequency / resistance data:', e)
 
     def plot_frequency_data(self):
 
         try:
+            if self.file_path_json is None:
+                return
+
             directory_of_frequency_channels = self.process_data_thread.get_frequency_data()
             sorted_keys = sorted(directory_of_frequency_channels.keys())
 
             for position, key in enumerate(sorted_keys):
                 if self.plot_channel_key_booleans[position]:
-                    self.frequency_lines[position].setData(x = directory_of_frequency_channels[key]['x'],
-                                                           y = directory_of_frequency_channels[key]['y'])
+                    self.frequency_lines[position].setData(x=directory_of_frequency_channels[key]['x'],
+                                                           y=directory_of_frequency_channels[key]['y'])
                 else:
-                    self.frequency_lines[position].setData([],[])
+                    self.frequency_lines[position].setData([], [])
         except Exception as e:
-            print (e)
+            print(e)
 
     def plot_resistance_data(self):
         try:
+            if self.file_path_json is None:
+                return
+
             time_duration_list, resistance_list = self.process_data_thread.get_resistance_data()
-            self.resistance_line.setData(x = time_duration_list, y = resistance_list)
+            self.resistance_line.setData(x=time_duration_list, y=resistance_list)
         except Exception as e:
-            print (e)
+            print(e)
 
     def plot_temperature_data(self):
         try:
-            self.temperature_plot_graph.setLabel ('left', 'Temperature (C)')
-            self.temperature_plot_graph.setLabel ('bottom', 'Time (S)')
+            if self.file_path_json is None:
+                return
+
+            self.temperature_plot_graph.setLabel('left', 'Temperature (C)')
+            self.temperature_plot_graph.setLabel('bottom', 'Time (S)')
             if not self.process_data_thread.temperature_queue.empty():
                 self.temperature_line.setData(*self.process_data_thread.get_temperature_data())
         except Exception as e:
-            print (e)
+            print(e)
 
     def plot_pressure_data(self):
         try:
-            self.pressure_plot_graph.setLabel ('left', 'Pa')
-            self.pressure_plot_graph.setLabel ('bottom', 'Time (S)')
+            if self.file_path_json is None:
+                return
+
+            self.pressure_plot_graph.setLabel('left', 'Pa')
+            self.pressure_plot_graph.setLabel('bottom', 'Time (S)')
 
             if not self.process_data_thread.pressure_queue.empty():
                 self.pressure_line.setData(*self.process_data_thread.get_pressure_data())
 
         except Exception as e:
-            print (e)
+            print(e)
 
     def plot_humidity_data(self):
         try:
-            self.humidity_plot_graph.setLabel ('left', '% Rh')
-            self.humidity_plot_graph.setLabel ('bottom', 'Time (S)')
+            if self.file_path_json is None:
+                return
 
+            self.humidity_plot_graph.setLabel('left', '% Rh')
+            self.humidity_plot_graph.setLabel('bottom', 'Time (S)')
 
             if not self.process_data_thread.humidity_queue.empty():
                 self.humidity_line.setData(*self.process_data_thread.get_humidity_data())
         except Exception as e:
-            print (e)
+            print(e)
 
     # When the region changes then this function will change the plots accordingly
     def update_plots_using_region(self):
-        self.frequency_plot_graph.setXRange  (*self.linear_region.getRegion(), padding = 0)
-        self.resistance_graph.setXRange  (*self.linear_region.getRegion(), padding = 0)
-        self.temperature_plot_graph.setXRange(*self.linear_region.getRegion(), padding = 0)
-        self.pressure_plot_graph.setXRange   (*self.linear_region.getRegion(), padding = 0)
-        self.humidity_plot_graph.setXRange   (*self.linear_region.getRegion(), padding = 0)
+        self.frequency_plot_graph.setXRange(*self.linear_region.getRegion(), padding=0)
+        self.resistance_graph.setXRange(*self.linear_region.getRegion(), padding=0)
+        self.temperature_plot_graph.setXRange(*self.linear_region.getRegion(), padding=0)
+        self.pressure_plot_graph.setXRange(*self.linear_region.getRegion(), padding=0)
+        self.humidity_plot_graph.setXRange(*self.linear_region.getRegion(), padding=0)
 
     def update_frequency_region(self):
         self.linear_region.setRegion(self.frequency_plot_graph.getViewBox().viewRange()[0])
@@ -463,6 +472,6 @@ class Graph_Window(GraphicsLayoutWidget):
         self.temperature_plot_graph.show()
         self.pressure_plot_graph.show()
         self.humidity_plot_graph.show()
-        #self.overview_graph.show()
+        # self.overview_graph.show()
 
         self.show()
