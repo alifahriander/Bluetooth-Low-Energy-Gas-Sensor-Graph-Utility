@@ -99,7 +99,6 @@ class Server_Handler(QThread):
                 if self.attempt_connection:
                     self.attempt_connection_button.setStyleSheet("background-color:rgb(0,255,0)")
                     self.get_file_from_server(str(self.parent_widget.file_path_json))
-                    # self.get_file_from_server(str(self.parent_widget.file_path_environment))
                 else:
                     self.attempt_connection_button.setStyleSheet("background-color:rgb(255,0,0)")
 
@@ -154,9 +153,10 @@ class Data_Processing_Stream_Thread(QThread):
             if self.parent_widget.file_path_json[-len('csv'):]:
                 if DOWNLOADING_FILES:
                     return
+                json_data = self.open_json_file()
 
-                with open(self.parent_widget.file_path_json, 'r') as current_file:
-                    json_data = json.load(current_file)
+                if json_data is None:
+                    return
 
                 self.process_frequency_data(json_data)
                 self.process_resistance_data(json_data)
@@ -164,13 +164,22 @@ class Data_Processing_Stream_Thread(QThread):
                 self.process_pressure_data(json_data)
                 self.process_humidity_data(json_data)
 
-
         except Exception as e:
             print('ERROR: Processing Data Thread:', e)
 
         finally:
             print('Process Function took: %0.4f ms' % float(time() - time_to_process))
             sleep(0.1)
+
+    def open_json_file(self):
+        try:
+            with open(self.parent_widget.file_path_json, 'r') as current_file:
+                json_data = json.load(current_file)
+        except Exception as e:
+            print ('ERROR: Opening JSON File:', e)
+            json_data = None
+        finally:
+            return json_data
 
     def process_temperature_data(self, json_data):
 
@@ -227,12 +236,11 @@ class Data_Processing_Stream_Thread(QThread):
                 self.humidity_queue.get()
                 self.humidity_queue.put((time_duration_list, humidity_list))
 
-
         except Exception as e:
             print('ERROR: processing humidity:', e)
 
     def process_frequency_data(self, json_data):
-        # Reads data from latest file and splits into a list of lines
+        """ Parses data from json_data variable and puts it into a queue """
 
         try:
             for key in self.sorted_keys:
@@ -276,16 +284,31 @@ class Data_Processing_Stream_Thread(QThread):
             print('Error: process_resistance_data:', e)
 
     def get_frequency_data(self):
-        return self.frequency_queue.get()
+        if not self.frequency_queue.empty():
+            return self.frequency_queue.get()
+        else:
+            return None
 
     def get_resistance_data(self):
-        return self.resistance_queue.get()
+        if not self.resistance_queue.empty():
+            return self.resistance_queue.get()
+        else:
+            return None
 
     def get_temperature_data(self):
-        return self.temperature_queue.get()
+        if not self.temperature_queue.empty():
+            return self.temperature_queue.get()
+        else:
+            return None
 
     def get_pressure_data(self):
-        return self.pressure_queue.get()
+        if not self.pressure_queue.empty():
+            return self.pressure_queue.get()
+        else:
+            return None
 
     def get_humidity_data(self):
-        return self.humidity_queue.get()
+        if not self.humidity_queue.empty():
+            return self.humidity_queue.get()
+        else:
+            return None

@@ -4,9 +4,9 @@
 
 # 3rd Party Modules
 import pyqtgraph as pg
-from pyqtgraph import GraphicsLayoutWidget
+from pyqtgraph import GraphicsLayoutWidget, PlotWidget
 from pyqtgraph.Qt import QtCore
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QToolTip
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QToolTip, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import QThread
 from PyQt5.QtGui import QFont, QFileDialog
 
@@ -39,33 +39,20 @@ def SELECT_LATEST_FILE_JSON(directory=LOCAL_DIRECTORY_OF_SENSOR_DATA):
 
 
 class Graph_Window(GraphicsLayoutWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent_widget):
+        GraphicsLayoutWidget.__init__(self, parent_widget)
+        self.parent_widget = parent_widget
 
         self.resize(1920, 1080)
 
         button_width = 19
 
-        ########################################################################
-        # File Manipulation Buttons
-        ########################################################################
 
-        open_frequency_resistance_file_button = QPushButton('Open Json', self)
-        open_frequency_resistance_file_button.resize(160, button_width)
-        open_frequency_resistance_file_button.clicked.connect(self.select_json_file)
 
-        ########################################################################
-        # Attempt Connection Buttons
-        ########################################################################
-
-        attempt_connection_button = QPushButton('Attempt Connection', self)
-        attempt_connection_button.resize(150, button_width)
-        attempt_connection_button.clicked.connect(self.attempt_to_connect)
-        attempt_connection_button.move(340, 0)
-
-        ########################################################################
+        #######################################################################
         # Plot Channel Plotting Booleans
-        ########################################################################
+        #######################################################################
+
         self.plot_channel_one = True
         self.plot_channel_two = True
         self.plot_channel_three = True
@@ -76,101 +63,35 @@ class Graph_Window(GraphicsLayoutWidget):
         self.plot_channel_eight = True
 
         # The position of this list corispond to the position of the sorted directory_of_frequency_channels keys
-        self.plot_channel_key_booleans = []
-        for count in range(len(DICTIONARY_OF_CHANNEL_KEYS.keys())):
-            self.plot_channel_key_booleans.append(True)
+        self.plot_channel_key_booleans = [True for count in range(len(DICTIONARY_OF_CHANNEL_KEYS.keys()))]
 
-        ########################################################################
-        # Graph Channel Buttons
-        ########################################################################
-
-        channel_button_x_location_start = 490
-        length_of_button = 150
-        self.graph_channel_one_button = QPushButton('Graph Channel 0', self)
-        self.graph_channel_one_button.resize(length_of_button, button_width)
-        self.graph_channel_one_button.clicked.connect(self.switch_frequency_plot_channel_one)
-        self.graph_channel_one_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
-
-        channel_button_x_location_start += length_of_button
-        self.graph_channel_two_button = QPushButton('Graph Channel 1', self)
-        self.graph_channel_two_button.resize(length_of_button, button_width)
-        self.graph_channel_two_button.clicked.connect(self.switch_frequency_plot_channel_two)
-        self.graph_channel_two_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
-
-        channel_button_x_location_start += length_of_button
-        self.graph_channel_three_button = QPushButton('Graph Channel 2', self)
-        self.graph_channel_three_button.resize(length_of_button, button_width)
-        self.graph_channel_three_button.clicked.connect(self.switch_frequency_plot_channel_three)
-        self.graph_channel_three_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
-
-        channel_button_x_location_start += length_of_button
-        self.graph_channel_four_button = QPushButton('Graph Channel 3', self)
-        self.graph_channel_four_button.resize(length_of_button, button_width)
-        self.graph_channel_four_button.clicked.connect(self.switch_frequency_plot_channel_four)
-        self.graph_channel_four_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
-
-        channel_button_x_location_start += length_of_button
-        self.graph_channel_five_button = QPushButton('Graph Channel 4', self)
-        self.graph_channel_five_button.resize(length_of_button, button_width)
-        self.graph_channel_five_button.clicked.connect(self.switch_frequency_plot_channel_five)
-        self.graph_channel_five_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
-
-        channel_button_x_location_start += length_of_button
-        self.graph_channel_six_button = QPushButton('Graph Channel 5', self)
-        self.graph_channel_six_button.resize(length_of_button, button_width)
-        self.graph_channel_six_button.clicked.connect(self.switch_frequency_plot_channel_six)
-        self.graph_channel_six_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
-
-        channel_button_x_location_start += length_of_button
-        self.graph_channel_seven_button = QPushButton('Graph Channel 6', self)
-        self.graph_channel_seven_button.resize(length_of_button, button_width)
-        self.graph_channel_seven_button.clicked.connect(self.switch_frequency_plot_channel_seven)
-        self.graph_channel_seven_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
-
-        channel_button_x_location_start += length_of_button
-        self.graph_channel_eight_button = QPushButton('Graph Channel 7', self)
-        self.graph_channel_eight_button.resize(length_of_button, button_width)
-        self.graph_channel_eight_button.clicked.connect(self.switch_frequency_plot_channel_eight)
-        self.graph_channel_eight_button.move(channel_button_x_location_start, 0)
-        self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
-
-        channel_button_x_location_start += length_of_button
-        self.download_all_files_button = QPushButton('Download All Files', self)
-        self.download_all_files_button.resize(length_of_button + 50, button_width)
-        self.download_all_files_button.clicked.connect(self.download_all_files)
-        self.download_all_files_button.move(channel_button_x_location_start, 0)
-        self.download_all_files_button.setStyleSheet("background-color:rgb(255,255,255)")
-
-        ########################################################################
+        #######################################################################
         # Init of linear region that can control all graphs at once
-        ########################################################################
+        #######################################################################
         self.linear_region = pg.LinearRegionItem([0, 3000])
         self.linear_region.setZValue(-10)
 
-        ########################################################################
+        #######################################################################
         # Init of all plot widgets
-        ########################################################################
+        #######################################################################
 
         self.frequency_plot_graph = self.addPlot(title='Frequency')
-        self.frequency_resistance_legend = self.frequency_plot_graph.addLegend()
-
+        if ADD_FREQUENCY_LEGEND:
+            self.frequency_resistance_legend = self.frequency_plot_graph.addLegend()
         self.nextRow()
+
         self.resistance_graph = self.addPlot(title='Resistance')
-
         self.nextRow()
+
         self.temperature_plot_graph = self.addPlot(title='Temperature')
         self.nextRow()
+
         self.pressure_plot_graph = self.addPlot(title='Pressure')
         self.nextRow()
+
         self.humidity_plot_graph = self.addPlot(title='Humidity')
         self.nextRow()
+
         self.overview_graph = self.addPlot(title='Overview')
         self.overview_graph.addItem(self.linear_region)
 
@@ -232,18 +153,20 @@ class Graph_Window(GraphicsLayoutWidget):
 
         self.file_path_json = SELECT_LATEST_FILE_JSON()
 
-        ########################################################################
+
+
+        #######################################################################
         # Data Processing Thread
-        ########################################################################
-        self.server_handler = Server_Handler(self, attempt_connection_button)
+        #######################################################################
+        self.server_handler = Server_Handler(self, self.parent_widget.attempt_connection_button)
         self.server_handler.start()
 
         self.process_data_thread = Data_Processing_Stream_Thread(self)
         self.process_data_thread.start()
 
-        ########################################################################
+        #######################################################################
         # Timers
-        ########################################################################
+        #######################################################################
         self.plot_timer_frequency = QtCore.QTimer()
         self.plot_timer_frequency.timeout.connect(self.plot_frequency_data)
         self.plot_timer_frequency.start(1000)
@@ -276,68 +199,68 @@ class Graph_Window(GraphicsLayoutWidget):
     def switch_frequency_plot_channel_one(self):
         if self.plot_channel_key_booleans[0]:
             self.plot_channel_key_booleans[0] = False
-            self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
+            self.parent_widget.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
 
         else:
             self.plot_channel_key_booleans[0] = True
-            self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
+            self.parent_widget.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
 
     def switch_frequency_plot_channel_two(self):
         if self.plot_channel_key_booleans[1]:
             self.plot_channel_key_booleans[1] = False
-            self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
+            self.parent_widget.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
             self.plot_channel_key_booleans[1] = True
-            self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
+            self.parent_widget.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
 
     def switch_frequency_plot_channel_three(self):
         if self.plot_channel_key_booleans[2]:
             self.plot_channel_key_booleans[2] = False
-            self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
+            self.parent_widget.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
 
         else:
             self.plot_channel_key_booleans[2] = True
-            self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
+            self.parent_widget.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
 
     def switch_frequency_plot_channel_four(self):
         if self.plot_channel_key_booleans[3]:
             self.plot_channel_key_booleans[3] = False
-            self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
+            self.parent_widget.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
             self.plot_channel_key_booleans[3] = True
-            self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
+            self.parent_widget.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
 
     def switch_frequency_plot_channel_five(self):
         if self.plot_channel_key_booleans[4]:
             self.plot_channel_key_booleans[4] = False
-            self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
+            self.parent_widget.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
             self.plot_channel_key_booleans[4] = True
-            self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
+            self.parent_widget.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
 
     def switch_frequency_plot_channel_six(self):
         if self.plot_channel_key_booleans[5]:
             self.plot_channel_key_booleans[5] = False
-            self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
+            self.parent_widget.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
             self.plot_channel_key_booleans[5] = True
-            self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
+            self.parent_widget.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
 
     def switch_frequency_plot_channel_seven(self):
         if self.plot_channel_key_booleans[6]:
             self.plot_channel_key_booleans[6] = False
-            self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
+            self.parent_widget.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
             self.plot_channel_key_booleans[6] = True
-            self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
+            self.parent_widget.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
 
     def switch_frequency_plot_channel_eight(self):
         if self.plot_channel_key_booleans[7]:
             self.plot_channel_key_booleans[7] = False
-            self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
+            self.parent_widget.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (255, 255, 255))
         else:
             self.plot_channel_key_booleans[7] = True
-            self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
+            self.parent_widget.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
 
     def clear_all_plots(self):
         for curve in self.frequency_lines:
@@ -354,32 +277,13 @@ class Graph_Window(GraphicsLayoutWidget):
         else:
             self.server_handler.attempt_connection = True
 
-    def plot_frequency_or_resistance_data(self):
-        try:
-            if self.file_path_json is None:
-                return
-
-            if self.file_path_json[-len('Frequency.csv'):] == 'Frequency.csv':
-                if not self.process_data_thread.frequency_queue.empty():
-                    self.frequency_plot_graph.setTitle('Resonant Frequency')
-                    self.frequency_plot_graph.setLabel('left', 'Frequency (MHz)')
-                    self.frequency_plot_graph.setLabel('bottom', 'Time (s)')
-                    self.plot_frequency_data()
-
-            elif self.file_path_json[-len('Resistance.csv'):] == 'Resistance.csv':
-                if not self.process_data_thread.resistance_queue.empty():
-                    self.frequency_plot_graph.setTitle('Resistance')
-                    self.frequency_plot_graph.setLabel('left', 'Resistance (Ohms)')
-                    self.frequency_plot_graph.setLabel('bottom', 'Time (s)')
-                    self.plot_resistance_data()
-
-        except Exception as e:
-            print('ERROR: Plot frequency / resistance data:', e)
-
     def plot_frequency_data(self):
 
         try:
             if self.file_path_json is None:
+                return
+
+            if self.process_data_thread.frequency_queue.empty():
                 return
 
             directory_of_frequency_channels = self.process_data_thread.get_frequency_data()
@@ -399,8 +303,10 @@ class Graph_Window(GraphicsLayoutWidget):
             if self.file_path_json is None:
                 return
 
-            time_duration_list, resistance_list = self.process_data_thread.get_resistance_data()
-            self.resistance_line.setData(x=time_duration_list, y=resistance_list)
+            if self.process_data_thread.resistance_queue.empty():
+                return
+
+            self.resistance_line.setData(*self.process_data_thread.get_resistance_data())
         except Exception as e:
             print(e)
 
@@ -472,6 +378,102 @@ class Graph_Window(GraphicsLayoutWidget):
         self.temperature_plot_graph.show()
         self.pressure_plot_graph.show()
         self.humidity_plot_graph.show()
-        # self.overview_graph.show()
+        self.overview_graph.show()
+        self.overview_graph.setXRange(-1000, 5000)
 
-        self.show()
+
+class Main_Widget(QWidget):
+    def __init__(self):
+        super().__init__()
+
+
+        #######################################################################
+        # Attempt Connection Buttons
+        #######################################################################
+
+        self.attempt_connection_button = QPushButton('Attempt Connection', self)
+
+        #######################################################################
+        # Graph Widget
+        #######################################################################
+
+        self.graph_widget = Graph_Window(self)
+        self.graph_widget.show_graphs()
+
+        # Need to keep this function bellow the declaration of self.graph_widget
+        self.attempt_connection_button.clicked.connect(self.graph_widget.attempt_to_connect)
+
+        #######################################################################
+        # File Manipulation Buttons
+        #######################################################################
+
+        self.open_frequency_resistance_file_button = QPushButton('Open Json', self)
+        self.open_frequency_resistance_file_button.clicked.connect(self.graph_widget.select_json_file)
+
+
+        #######################################################################
+        # Graph Channel Buttons
+        #######################################################################
+
+        self.graph_channel_one_button = QPushButton('Graph Channel 0', self)
+        self.graph_channel_one_button.clicked.connect(self.graph_widget.switch_frequency_plot_channel_one)
+        self.graph_channel_one_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[0]))
+
+        self.graph_channel_two_button = QPushButton('Graph Channel 1', self)
+        self.graph_channel_two_button.clicked.connect(self.graph_widget.switch_frequency_plot_channel_two)
+        self.graph_channel_two_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[1]))
+
+        self.graph_channel_three_button = QPushButton('Graph Channel 2', self)
+        self.graph_channel_three_button.clicked.connect(self.graph_widget.switch_frequency_plot_channel_three)
+        self.graph_channel_three_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[2]))
+
+        self.graph_channel_four_button = QPushButton('Graph Channel 3', self)
+        self.graph_channel_four_button.clicked.connect(self.graph_widget.switch_frequency_plot_channel_four)
+        self.graph_channel_four_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[3]))
+
+        self.graph_channel_five_button = QPushButton('Graph Channel 4', self)
+        self.graph_channel_five_button.clicked.connect(self.graph_widget.switch_frequency_plot_channel_five)
+        self.graph_channel_five_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[4]))
+
+        self.graph_channel_six_button = QPushButton('Graph Channel 5', self)
+        self.graph_channel_six_button.clicked.connect(self.graph_widget.switch_frequency_plot_channel_six)
+        self.graph_channel_six_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[5]))
+
+        self.graph_channel_seven_button = QPushButton('Graph Channel 6', self)
+        self.graph_channel_seven_button.clicked.connect(self.graph_widget.switch_frequency_plot_channel_seven)
+        self.graph_channel_seven_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[6]))
+
+        self.graph_channel_eight_button = QPushButton('Graph Channel 7', self)
+        self.graph_channel_eight_button.clicked.connect(self.graph_widget.switch_frequency_plot_channel_eight)
+        self.graph_channel_eight_button.setStyleSheet("background-color:rgb(%d,%d,%d)" % (LINE_COLORS[7]))
+
+        self.download_all_files_button = QPushButton('Download All Files', self)
+        self.download_all_files_button.clicked.connect(self.graph_widget.download_all_files)
+        self.download_all_files_button.setStyleSheet("background-color:rgb(255,255,255)")
+
+
+
+        #######################################################################
+        # Layouts
+        #######################################################################
+
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.open_frequency_resistance_file_button)
+        button_layout.addWidget(self.attempt_connection_button)
+        button_layout.addWidget(self.graph_channel_one_button)
+        button_layout.addWidget(self.graph_channel_two_button)
+        button_layout.addWidget(self.graph_channel_three_button)
+        button_layout.addWidget(self.graph_channel_four_button)
+        button_layout.addWidget(self.graph_channel_five_button)
+        button_layout.addWidget(self.graph_channel_six_button)
+        button_layout.addWidget(self.graph_channel_seven_button)
+        button_layout.addWidget(self.graph_channel_eight_button)
+        button_layout.addWidget(self.download_all_files_button)
+
+        overall_layout = QVBoxLayout()
+        overall_layout.addLayout(button_layout)
+        overall_layout.addWidget(self.graph_widget)
+
+        self.setLayout(overall_layout)
+
+        self.setGeometry(100, 100, 1280 + 100, 720 + 100)

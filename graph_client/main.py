@@ -1,17 +1,22 @@
 # Python Modules
 import sys
 
-# Developer Modules 
+# Developer Modules
 from graph_widget import *
+from config import ANTIALIAS
 
-if __name__ == '__main__':
+
+def main():
     app = QApplication(sys.argv)
 
     pg.setConfigOption('background', 'w')
     pg.setConfigOption('foreground', 'k')
-    pg.setConfigOptions(antialias=True)
+    pg.setConfigOptions(antialias=ANTIALIAS)
 
-    graph_window = Graph_Window()
-    graph_window.show_graphs()
+    graph_window = Main_Widget()
+    graph_window.show()
 
     sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
