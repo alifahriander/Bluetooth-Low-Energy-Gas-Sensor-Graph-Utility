@@ -7,8 +7,8 @@ setup(name='CMUT Graph graph Manager',
       url='https://github.com/santosderek/Bluetooth-Low-Energy-Gas-graph-Manager',
       packages=['graph_client'],
       scripts=['graph_client/main.py',
-               'graph_client/main_window.py',
-               'graph_client/graph.py',
+               'graph_client/graph_widget.py',
+               'graph_client/graph_widget_threads.py',
                'graph_client/config.py'],
       entry_points={
         'console_scripts':
