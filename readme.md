@@ -67,6 +67,17 @@ Lastly, configure the config.py as intended, and run the following command withi
 
 *** You might need to use 'sudo' before the command. ***
 
+*** If you experience troubles installing on ARM architecture you may need: ***
+
+> sudo apt-get install libffi-dev
+
+> sudo apt-get install libssl-dev
+
+> sudo apt-get install python-dev
+
+> sudo apt-get install python3-dev
+
+
 #### Optional
 
 
