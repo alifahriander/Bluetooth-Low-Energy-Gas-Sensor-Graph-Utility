@@ -1,12 +1,14 @@
 # Python Modules
 import sys
+import os
 
 # Developer Modules
 from graph_widget import *
-from config import ANTIALIAS
+from config import ANTIALIAS, LOCAL_DIRECTORY_OF_FILE
 
 
 def main():
+
     app = QApplication(sys.argv)
 
     pg.setConfigOption('background', 'w')

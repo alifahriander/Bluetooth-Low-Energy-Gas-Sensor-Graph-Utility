@@ -5,7 +5,6 @@ LOCAL_DIRECTORY_OF_SENSOR_DATA = LOCAL_DIRECTORY_OF_FILE + '/sensor_data/'
 if not os.path.exists(LOCAL_DIRECTORY_OF_SENSOR_DATA):
     os.mkdir(LOCAL_DIRECTORY_OF_SENSOR_DATA)
 
-LOCAL_DIRECTORY_OF_SENSOR_DATA = r'C:\Users\Tabby\Documents\GitHub\Bluetooth-Low-Energy-Gas-Sensor-Manager\sensor_client' + '/sensor_data/'
 
 # Checks if path has a '/' or '\' at the end of the string.
 # This is important since the string is used to look through files
@@ -47,4 +46,4 @@ DOWNLOADING_FILES = False
 
 ADD_FREQUENCY_LEGEND = False
 
-ANTIALIAS = True 
+ANTIALIAS = True
