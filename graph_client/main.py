@@ -8,7 +8,7 @@ from config import ANTIALIAS, LOCAL_DIRECTORY_OF_FILE
 
 
 def main():
-
+    """ Create the base widget within the program """
     app = QApplication(sys.argv)
 
     pg.setConfigOption('background', 'w')
@@ -19,6 +19,7 @@ def main():
     graph_window.show()
 
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()
